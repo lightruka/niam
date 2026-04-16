@@ -51,13 +51,13 @@
 
 /* ---------- Dark Mode Custom Properties ---------- */
 body.dark-mode {
-    --clr-bg:        #12100E;
-    --clr-surface:   #1C1916;
-    --clr-surface-2: #2A2520;
-    --clr-border:    #38322B;
-    --clr-text:      #F5F0E8;
-    --clr-text-soft: #C2B8A8;
-    --clr-text-muted:#8F8678;
+    --clr-bg:        #121212;
+    --clr-surface:   #1E1E1E;
+    --clr-surface-2: #2D2D2D;
+    --clr-border:    #333333;
+    --clr-text:      #FFFFFF;
+    --clr-text-soft: #B0B0B0;
+    --clr-text-muted:#808080;
 
     --clr-primary:    #D4803A;
     --clr-primary-hover: #E89550;
@@ -66,12 +66,12 @@ body.dark-mode {
     --clr-accent:     #5A9E6F;
     --clr-accent-light: rgba(90, 158, 111, 0.15);
     
-    --clr-nav-bg:     rgba(28, 25, 22, 0.92);
+    --clr-nav-bg:     rgba(18, 18, 18, 0.95);
     
-    --shadow-xs:  0 1px 3px rgba(0,0,0,.3);
-    --shadow-sm:  0 2px 8px rgba(0,0,0,.4);
-    --shadow-md:  0 4px 20px rgba(0,0,0,.5);
-    --shadow-lg:  0 8px 40px rgba(0,0,0,.6);
+    --shadow-xs:  0 1px 3px rgba(0,0,0,.5);
+    --shadow-sm:  0 2px 8px rgba(0,0,0,.6);
+    --shadow-md:  0 4px 20px rgba(0,0,0,.7);
+    --shadow-lg:  0 8px 40px rgba(0,0,0,.8);
 }
 
 /* ---------- Reset & Base ---------- */
@@ -671,7 +671,13 @@ button {
     color: var(--clr-text);
 }
 
-.fav-btn {
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fav-btn, .share-btn {
     flex-shrink: 0;
     width: 36px;
     height: 36px;
@@ -683,9 +689,13 @@ button {
     transition: all var(--dur) var(--ease);
 }
 
-.fav-btn:hover {
-    color: var(--clr-heart);
-    background: rgba(226,91,91,.08);
+.fav-btn:hover, .share-btn:hover {
+    color: var(--clr-primary);
+    background: var(--clr-primary-light);
+}
+
+.fav-btn:active, .share-btn:active {
+    transform: scale(0.9);
 }
 
 .fav-btn.active {

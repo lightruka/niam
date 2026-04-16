@@ -233,13 +233,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="recipe" id="recipe-active">
                     <div class="recipe-header">
                         <h3 class="recipe-name">${title}</h3>
-                        <button class="fav-btn" id="fav-btn-active" aria-label="Ajouter aux favoris">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                        </button>
+                        <div class="header-actions">
+                            <button class="share-btn" id="share-btn-active" aria-label="Partager la recette">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+                                </svg>
+                            </button>
+                            <button class="fav-btn" id="fav-btn-active" aria-label="Ajouter aux favoris">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            </button>
+                        </div>
                     </div>
                     <div class="recipe-meta">
-                        <span class="meta-tag"><span class="meta-icon">🔥</span> ${calStr}</span>
-                        <span class="meta-tag"><span class="meta-icon">⏱️</span> ${timeStr}</span>
+                        <span class="meta-tag" data-val="${calStr}"><span class="meta-icon">🔥</span> ${calStr}</span>
+                        <span class="meta-tag" data-val="${timeStr}"><span class="meta-icon">⏱️</span> ${timeStr}</span>
                         <span class="meta-tag"><span class="meta-icon">👥</span> 2 pers.</span>
                     </div>
                     <div class="recipe-steps">
@@ -483,7 +490,40 @@ document.addEventListener('DOMContentLoaded', () => {
             const recipeDiv = favBtn.closest('.recipe');
             if(recipeDiv) toggleFavorite(recipeDiv);
         }
+
+        const shareBtn = e.target.closest('.share-btn');
+        if (shareBtn) {
+            const recipeDiv = shareBtn.closest('.recipe');
+            if(recipeDiv) shareRecipe(recipeDiv);
+        }
     });
+
+    async function shareRecipe(recipeDiv) {
+        const title = recipeDiv.querySelector('.recipe-name').textContent.trim();
+        const cal = recipeDiv.querySelector('.meta-tag[data-val*="kcal"]')?.dataset.val || "";
+        const time = recipeDiv.querySelector('.meta-tag[data-val*="min"]')?.dataset.val || "";
+        
+        const shareData = {
+            title: `Recette Anti-Gaspi : ${title}`,
+            text: `Regarde cette recette anti-gaspi générée par Niam ! 🍳 : ${title}. Temps : ${time}. Calories : ${cal}.`,
+            url: window.location.href
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                // Fallback for desktop or non-supported browsers
+                await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+                showToast("Lien copié dans le presse-papier !");
+            }
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                showToast("Erreur lors du partage.");
+                console.error("Share error:", err);
+            }
+        }
+    }
 
     resultsSection.addEventListener('change', (e) => {
         // Handle Shopping Checkboxes
