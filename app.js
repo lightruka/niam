@@ -124,11 +124,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const equipStr = eqp.length > 0 ? `Cuisiné avec : ${eqp.join(', ')}` : "Préparez vos ustensiles.";
 
+            // Check if already favorite
+            const favs = JSON.parse(localStorage.getItem('antiGaspiFavorites') || '[]');
+            const isFav = favs.some(f => f.id === title.trim());
+            const activeClass = isFav ? 'active' : '';
+
             recipesHtml += `
                 <div class="recipe" id="recipe-${i+1}">
                     <div class="recipe-header">
                         <h3 class="recipe-name">${title}</h3>
-                        <button class="fav-btn" id="fav-btn-${i+1}" aria-label="Ajouter aux favoris">
+                        <button class="fav-btn ${activeClass}" id="fav-btn-${i+1}" aria-label="Ajouter aux favoris">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         </button>
                     </div>
@@ -217,12 +222,80 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    // ---- Event Delegation for Dynamic Elements in Results ----
+    // ---- Favorites Storage & Rendering ----
+    const favoritesContainer = document.getElementById('favorites-container');
+    
+    function getFavorites() {
+        return JSON.parse(localStorage.getItem('antiGaspiFavorites') || '[]');
+    }
+
+    function saveFavorites(favs) {
+        localStorage.setItem('antiGaspiFavorites', JSON.stringify(favs));
+    }
+
+    function toggleFavorite(recipeDiv, forceState = null) {
+        const title = recipeDiv.querySelector('.recipe-name').textContent.trim();
+        let favs = getFavorites();
+        
+        const existingIdx = favs.findIndex(f => f.id === title);
+        const isActive = forceState !== null ? forceState : existingIdx === -1;
+        
+        if (!isActive && existingIdx >= 0) {
+            // Remove from array
+            favs.splice(existingIdx, 1);
+            recipeDiv.querySelector('.fav-btn').classList.remove('active');
+        } else if (isActive && existingIdx === -1) {
+            // Clone content to save in favorites
+            const clonedDiv = recipeDiv.cloneNode(true);
+            clonedDiv.querySelector('.fav-btn').classList.add('active'); 
+            
+            favs.push({
+                id: title,
+                html: clonedDiv.innerHTML
+            });
+            recipeDiv.querySelector('.fav-btn').classList.add('active');
+        }
+        
+        saveFavorites(favs);
+        renderFavorites();
+    }
+
+    function renderFavorites() {
+        const favs = getFavorites();
+        if(favs.length === 0) {
+            if (favoritesContainer) {
+                favoritesContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">❤️</div>
+                        <h3>Aucun favori pour le moment</h3>
+                        <p>Vos recettes sauvegardées apparaîtront ici.</p>
+                    </div>
+                `;
+            }
+            return;
+        }
+
+        let html = '<div class="result-card menu-card" style="margin-top: 16px;">';
+        favs.forEach((fav, index) => {
+            html += `
+                <div class="recipe" data-favid="${fav.id}">
+                    ${fav.html}
+                </div>
+                ${index < favs.length - 1 ? '<hr class="recipe-divider">' : ''}
+            `;
+        });
+        html += '</div>';
+        if (favoritesContainer) {
+            favoritesContainer.innerHTML = html;
+        }
+    }
+
+    // Delegation in Results View
     resultsSection.addEventListener('click', (e) => {
-        // Toggle Fav Buttons
         const favBtn = e.target.closest('.fav-btn');
         if (favBtn) {
-            favBtn.classList.toggle('active');
+            const recipeDiv = favBtn.closest('.recipe');
+            if(recipeDiv) toggleFavorite(recipeDiv);
         }
     });
 
@@ -232,6 +305,30 @@ document.addEventListener('DOMContentLoaded', () => {
             updateShoppingCount();
         }
     });
+
+    // Delegation in Favorites View
+    if (favoritesContainer) {
+        favoritesContainer.addEventListener('click', (e) => {
+            const favBtn = e.target.closest('.fav-btn');
+            if (favBtn) {
+                const recipeDiv = favBtn.closest('.recipe');
+                if(recipeDiv) {
+                    const title = recipeDiv.querySelector('.recipe-name').textContent.trim();
+                    toggleFavorite(recipeDiv, false); // force removal
+                    
+                    // Also untoggle in generator if visible
+                    const generatorMatches = resultsSection.querySelectorAll('.recipe');
+                    generatorMatches.forEach(rec => {
+                        if(rec.querySelector('.recipe-name').textContent.trim() === title) {
+                            rec.querySelector('.fav-btn').classList.remove('active');
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    renderFavorites(); // Init favorites on load
 
     function updateShoppingCount() {
         const checkboxes = resultsSection.querySelectorAll('.shopping-list input[type="checkbox"]');
