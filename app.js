@@ -41,9 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const email = authEmail.value.trim();
             const submitBtn = document.getElementById('auth-submit');
+            const authInfo = document.querySelector('.auth-info');
             
+            // 1. Loading State
             submitBtn.disabled = true;
-            submitBtn.querySelector('.btn-content').textContent = "Lien en cours...";
+            submitBtn.querySelector('.btn-content').textContent = "Envoi en cours...";
+            authInfo.classList.remove('success', 'error');
+            authInfo.textContent = "Préparation de votre lien magique...";
 
             const { error } = await supabase.auth.signInWithOtp({
                 email,
@@ -51,12 +55,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (error) {
+                // 2. Error State
                 showToast("❌ Erreur : " + error.message);
                 submitBtn.disabled = false;
-                submitBtn.querySelector('.btn-content').textContent = "Se connecter";
+                submitBtn.querySelector('.btn-content').textContent = "Réessayer";
+                authInfo.textContent = "Erreur : " + error.message;
+                authInfo.classList.add('error');
             } else {
-                showToast("📩 Lien envoyé ! Vérifiez vos mails.");
-                submitBtn.querySelector('.btn-content').textContent = "Vérifiez vos emails !";
+                // 3. Success State
+                showToast("📩 Lien envoyé !");
+                submitBtn.querySelector('.btn-content').textContent = "Lien envoyé !";
+                authInfo.textContent = "Lien envoyé ! Vérifiez votre boîte mail (et vos spams).";
+                authInfo.classList.add('success');
             }
         });
     }
