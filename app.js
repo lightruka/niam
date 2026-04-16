@@ -4,46 +4,55 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 document.addEventListener('DOMContentLoaded', () => {
     // ---- Supabase Auth Logic ----
-    const viewAuth = document.getElementById('view-auth');
     const authForm = document.getElementById('auth-form');
     const authEmail = document.getElementById('auth-email');
-    const bottomNav = document.getElementById('bottom-nav');
 
-    async function checkSession() {
-        if (!supabaseClient) return;
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        handleAuthState(session);
-    }
+    // 1. Vérifier la session au démarrage
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        handleSessionState(session);
+    });
 
-    function handleAuthState(session) {
+    // 2. Écouter les changements en direct (quand on clique sur le lien mail)
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN') {
+            handleSessionState(session);
+            // Nettoyer l'URL pour enlever le token
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } else if (event === 'SIGNED_OUT') {
+            handleSessionState(null);
+        }
+    });
+
+    // 3. Fonction pour basculer l'affichage
+    function handleSessionState(session) {
+        const authView = document.getElementById('view-auth');
+        const generatorView = document.getElementById('view-generator');
+        const bottomNav = document.getElementById('bottom-nav');
+
         if (session) {
-            // User is logged in
-            viewAuth.classList.remove('active');
-            bottomNav.classList.remove('hidden');
-            switchToView('generator');
-            loadRecipesFromCloud(); // Fetch from DB
+            // Connecté : on cache Auth, on montre l'App
+            if(authView) authView.classList.remove('active');
+            if(generatorView) generatorView.classList.add('active');
+            if(bottomNav) bottomNav.classList.remove('hidden');
+            
+            loadRecipesFromCloud(); // Charger les données cloud
         } else {
-            // User is NOT logged in
-            viewAuth.classList.add('active');
-            bottomNav.classList.add('hidden');
+            // Déconnecté : on force Auth
             document.querySelectorAll('.view').forEach(v => {
-                if (v.id !== 'view-auth') v.classList.remove('active', 'animating');
+                v.classList.remove('active', 'animating');
             });
+            if(authView) authView.classList.add('active');
+            if(bottomNav) bottomNav.classList.add('hidden');
         }
     }
 
     if (supabaseClient) {
-        supabaseClient.auth.onAuthStateChange((_event, session) => {
-            handleAuthState(session);
-        });
-
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = authEmail.value.trim();
             const submitBtn = document.getElementById('auth-submit');
             const authInfo = document.querySelector('.auth-info');
             
-            // 1. Loading State
             submitBtn.disabled = true;
             submitBtn.querySelector('.btn-content').textContent = "Envoi en cours...";
             authInfo.classList.remove('success', 'error');
@@ -55,14 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (error) {
-                // 2. Error State
                 showToast("❌ Erreur : " + error.message);
                 submitBtn.disabled = false;
                 submitBtn.querySelector('.btn-content').textContent = "Réessayer";
                 authInfo.textContent = "Erreur : " + error.message;
                 authInfo.classList.add('error');
             } else {
-                // 3. Success State
                 showToast("📩 Lien envoyé !");
                 submitBtn.querySelector('.btn-content').textContent = "Lien envoyé !";
                 authInfo.textContent = "Lien envoyé ! Vérifiez votre boîte mail (et vos spams).";
