@@ -89,11 +89,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ---- Setup Toast ----
+    const toast = document.getElementById('toast');
+    function showToast(msg) {
+        if(!toast) return;
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
     // ---- Generate Button (Simulated AI) ----
     generateBtn.addEventListener('click', () => {
+        // Form Validation
+        const ingredientsInput = document.getElementById('ingredients-input');
+        if (!ingredientsInput.value.trim()) {
+            ingredientsInput.classList.add('shake-error');
+            setTimeout(() => ingredientsInput.classList.remove('shake-error'), 400); // match animation duration
+            showToast("Veuillez indiquer ce qu'il vous reste !");
+            return; // STOP execution
+        }
+
         // Collect user data
-        const ingredientsInput = document.getElementById('ingredients-input').value.trim();
-        const ingredients = ingredientsInput ? ingredientsInput.split(',').map(i => i.trim()).filter(i => i) : ['ingrédients mystères'];
+        const ingredients = ingredientsInput.value.trim().split(',').map(i => i.trim()).filter(i => i);
         const pTime = document.getElementById('prep-time').value || "30";
         const dietLabels = Array.from(document.querySelectorAll('#view-generator .badge.active')).map(b => b.textContent.trim());
 
@@ -222,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         resultsSection.innerHTML = `
             <!-- Menu Card -->
-            <div class="result-card menu-card" id="menu-card">
+            <div class="result-card menu-card animate-in" id="menu-card" style="animation-delay: 0s;">
                 <div class="card-header">
                     <div class="card-header-icon">🍽️</div>
                     <div>
@@ -234,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
 
             <!-- Shopping List Card -->
-            <div class="result-card shopping-card" id="shopping-card">
+            <div class="result-card shopping-card animate-in" id="shopping-card" style="animation-delay: 0.15s;">
                 <div class="card-header">
                     <div class="card-header-icon">🛒</div>
                     <div>
@@ -435,6 +452,13 @@ document.addEventListener('DOMContentLoaded', () => {
         snapBtn.addEventListener('click', () => {
             if (!cameraStream) return;
             
+            // Visual Flash Effect
+            const flash = document.getElementById('camera-flash');
+            if (flash) {
+                flash.classList.add('active');
+                setTimeout(() => flash.classList.remove('active'), 50);
+            }
+
             // Pause video to "freeze" the frame visually
             cameraVideo.pause();
 

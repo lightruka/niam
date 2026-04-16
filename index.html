@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Veuillez indiquer ce qu'il vous reste !</div>
+
     <div class="mobile-frame">
         <!-- ========== VIEWS CONTAINER ========== -->
         <div id="view-generator" class="view active">
@@ -283,6 +286,9 @@
 
         <!-- ========== CAMERA MODAL ========== -->
         <div class="camera-modal hidden" id="camera-modal">
+            <!-- Flash white overlay -->
+            <div id="camera-flash" class="camera-flash"></div>
+            
             <video id="camera-feed" class="camera-video" autoplay playsinline></video>
             <canvas id="camera-canvas" class="hidden"></canvas>
             
