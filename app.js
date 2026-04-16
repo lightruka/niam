@@ -46,6 +46,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     mealCount.style.transition = 'transform .15s cubic-bezier(.4,0,.2,1)';
 
+    // ---- Custom Select Logic ----
+    const customTimeSelect = document.getElementById('custom-time-select');
+    if (customTimeSelect) {
+        const trigger = customTimeSelect.querySelector('.select-trigger');
+        const selectedValue = customTimeSelect.querySelector('.selected-value');
+        const options = customTimeSelect.querySelectorAll('.select-option');
+        const hiddenInput = document.getElementById('prep-time');
+
+        // Toggle dropdown
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            customTimeSelect.classList.toggle('open');
+        });
+
+        // Handle option selection
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                options.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                
+                // Keep the text without the emoji for the summary if we want, but keeping full text is okay
+                selectedValue.textContent = option.textContent;
+                hiddenInput.value = option.dataset.value;
+                
+                customTimeSelect.classList.remove('open');
+            });
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!customTimeSelect.contains(e.target)) {
+                customTimeSelect.classList.remove('open');
+            }
+        });
+    }
+
     // ---- Diet Badges Toggle ----
     badges.forEach(badge => {
         badge.addEventListener('click', () => {
