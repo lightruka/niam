@@ -1013,59 +1013,80 @@ button {
 .history-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding-bottom: 20px;
+    gap: 8px; /* Tighter gap for list feel */
+    padding-bottom: 24px;
 }
 
 .history-item {
     background: var(--clr-surface);
     border: 1px solid var(--clr-border);
     border-radius: var(--r-md);
-    padding: 16px;
+    padding: 12px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
     transition: all var(--dur) var(--ease);
-    box-shadow: var(--shadow-sm);
 }
 
 .history-item:hover {
-    border-color: var(--clr-primary);
-    transform: translateY(-1px);
-    background: linear-gradient(to right, var(--clr-surface), var(--clr-surface-2));
+    background: var(--clr-surface-2);
+    border-color: var(--clr-primary-light);
+    transform: translateX(4px); /* Slide effect instead of lift */
 }
 
 .history-item:active {
-    transform: translateY(0) scale(0.98);
+    background: var(--clr-primary-light);
+    transform: scale(0.98);
 }
 
 .history-info {
     display: flex;
+    align-items: center; /* Row layout for compact info */
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.history-icon-small {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.history-text-wrapper {
+    display: flex;
     flex-direction: column;
-    gap: 6px;
+    min-width: 0;
 }
 
 .history-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--clr-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Truncate text */
 }
 
 .history-meta {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: .8rem;
+    gap: 8px;
+    font-size: .75rem;
     color: var(--clr-text-muted);
 }
 
 .history-calories {
-    background: var(--clr-primary-light);
     color: var(--clr-primary);
-    padding: 2px 6px;
-    border-radius: var(--r-sm);
-    font-weight: 600;
+    font-weight: 700;
+}
+
+.history-chevron {
+    color: var(--clr-text-muted);
+    opacity: 0.5;
+    flex-shrink: 0;
+    margin-left: 8px;
 }
 
 /* ---------- PROFILE SECTION ---------- */

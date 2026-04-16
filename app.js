@@ -99,6 +99,13 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
+    // ---- Markdown Bold Parser Util ----
+    function parseMarkdownBold(text) {
+        if (!text) return "";
+        // Replace **text** with <strong>text</strong>
+        return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
+
     // ---- Generate Button (Gemini AI) ----
     generateBtn.addEventListener('click', async () => {
         // Form Validation
@@ -187,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
             stepsHtml += `
                 <li>
                     <span class="step-number">${idx + 1}</span>
-                    <span class="step-text">${step}</span>
+                    <span class="step-text">${parseMarkdownBold(step)}</span>
                 </li>
             `;
         });
@@ -370,39 +377,57 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!historyListContainer) return;
         const history = JSON.parse(localStorage.getItem('antiGaspiHistory') || '[]');
         
+        const resultsSectionElement = document.getElementById('results-section');
+
         if (history.length === 0) {
-            historyListContainer.innerHTML = '<p style="text-align:center; color:var(--clr-text-muted); font-size:.9rem; margin-top:20px;">Aucune recette passée.</p>';
+            if (resultsSectionElement) {
+                resultsSectionElement.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🍳</div>
+                        <h3>Prêt à cuisiner ?</h3>
+                        <p>Vos délicieuses créations apparaîtront ici.</p>
+                    </div>
+                `;
+                resultsSectionElement.classList.remove('hidden');
+            }
+            historyListContainer.innerHTML = '<p style="text-align:center; color:var(--clr-text-muted); font-size:.9rem; margin-top:20px;">Aucune archive.</p>';
             return;
         }
 
+        // 1. Render Active/Index 0 in Results Section
+        if (resultsSectionElement) {
+            resultsSectionElement.innerHTML = history[0].html;
+            resultsSectionElement.classList.remove('hidden');
+        }
+
+        // 2. Render Previous Items (index 1+) in History List Section
         let html = '';
         const prevRecipes = history.slice(1);
         
         if (prevRecipes.length === 0) {
-            historyListContainer.innerHTML = '<p style="text-align:center; color:var(--clr-text-muted); font-size:.9rem; margin-top:20px;">Aucune autre recette précédente.</p>';
+            historyListContainer.innerHTML = '<p style="text-align:center; color:var(--clr-text-muted); font-size:.85rem; padding: 20px 0;">C\'était votre première recette ! ✨</p>';
         } else {
             prevRecipes.forEach(h => {
                 html += `
                     <div class="history-item" data-id="${h.id}">
                         <div class="history-info">
-                            <span class="history-title">${h.title}</span>
-                            <div class="history-meta">
-                                <span>📅 ${h.date}</span>
-                                <span class="history-calories">${h.calories}</span>
+                            <span class="history-icon-small">🍱</span>
+                            <div class="history-text-wrapper">
+                                <span class="history-title">${h.title}</span>
+                                <div class="history-meta">
+                                    <span>${h.date}</span>
+                                    <span class="history-bullet">•</span>
+                                    <span class="history-calories">${h.calories}</span>
+                                </div>
                             </div>
                         </div>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--clr-text-muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        <div class="history-chevron">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </div>
                     </div>
                 `;
             });
             historyListContainer.innerHTML = html;
-        }
-        
-        // Ensure index 0 is visible in #results-section on reload
-        const resultsSectionElement = document.getElementById('results-section');
-        if (resultsSectionElement && resultsSectionElement.innerHTML.trim() === '' && history.length > 0) {
-            resultsSectionElement.innerHTML = history[0].html;
-            resultsSectionElement.classList.remove('hidden');
         }
     }
 
@@ -434,6 +459,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     renderHistoryList();
+                    
+                    // Smooth scroll to top to see the loaded recipe
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }

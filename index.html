@@ -148,18 +148,24 @@
             </header>
             <main class="main-content" id="history-container">
                 
-                <!-- Active Generation -->
+                <!-- Section 1: Active/Latest Generation -->
+                <div class="section-label">
+                    <span class="section-icon">✨</span>
+                    <span>À la une</span>
+                </div>
                 <section class="section results-section hidden" id="results-section">
+                    <!-- The active recipe (index 0) will be rendered here -->
                 </section>
 
-                <div class="section-label" style="margin-top:40px;">
+                <!-- Section 2: Previous Archives -->
+                <div class="section-label" style="margin-top:32px;">
                     <span class="section-icon">🕰️</span>
-                    <span>Recettes précédentes</span>
+                    <span>Vos anciennes recettes</span>
                 </div>
                 
-                <!-- History List -->
+                <!-- History List (Compact items from index 1 to 10) -->
                 <div class="history-list" id="history-list">
-                    <!-- Populated dynamically with compact cards -->
+                    <!-- Populated dynamically with compact items -->
                 </div>
 
             </main>
