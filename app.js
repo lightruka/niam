@@ -1,6 +1,6 @@
 const SUPABASE_URL = 'https://djceirgdjudaqxhdqlvg.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqY2VpcmdkanVkYXF4aGRxbHZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNjU1NjksImV4cCI6MjA5MTk0MTU2OX0._B7ejOaEMatK3Qqiboe-bV_dXORSsfDwzouC8bRJBgE';
-const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 document.addEventListener('DOMContentLoaded', () => {
     // ---- Supabase Auth Logic ----
@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const bottomNav = document.getElementById('bottom-nav');
 
     async function checkSession() {
-        if (!supabase) return;
-        const { data: { session } } = await supabase.auth.getSession();
+        if (!supabaseClient) return;
+        const { data: { session } } = await supabaseClient.auth.getSession();
         handleAuthState(session);
     }
 
@@ -32,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    if (supabase) {
-        supabase.auth.onAuthStateChange((_event, session) => {
+    if (supabaseClient) {
+        supabaseClient.auth.onAuthStateChange((_event, session) => {
             handleAuthState(session);
         });
 
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             authInfo.classList.remove('success', 'error');
             authInfo.textContent = "Préparation de votre lien magique...";
 
-            const { error } = await supabase.auth.signInWithOtp({
+            const { error } = await supabaseClient.auth.signInWithOtp({
                 email,
                 options: { emailRedirectTo: window.location.href }
             });
@@ -940,11 +940,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ---- Cloud Storage Logic (Supabase) ----
     async function saveRecipeToCloud(recipe) {
-        if (!supabase) return;
-        const { data: { user } } = await supabase.auth.getUser();
+        if (!supabaseClient) return;
+        const { data: { user } } = await supabaseClient.auth.getUser();
         if (!user) return;
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('recipes')
             .insert([{ 
                 user_id: user.id, 
@@ -957,8 +957,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadRecipesFromCloud() {
-        if (!supabase) return;
-        const { data: recipes, error } = await supabase
+        if (!supabaseClient) return;
+        const { data: recipes, error } = await supabaseClient
             .from('recipes')
             .select('*')
             .order('created_at', { ascending: false });
