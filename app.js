@@ -102,8 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---- Markdown Bold Parser Util ----
     function parseMarkdownBold(text) {
         if (!text) return "";
-        // Replace **text** with <strong>text</strong>
-        return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Replace **text** with <strong>text</strong> - handles multiple lines and spacing
+        return text.replace(/\*\*(.*?)\*\*/gs, '<strong>$1</strong>');
     }
 
     // ---- Generate Button (Gemini AI) ----
@@ -243,8 +243,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="meta-tag"><span class="meta-icon">👥</span> 2 pers.</span>
                     </div>
                     <div class="recipe-steps">
-                        <h4 class="steps-title">Étapes de préparation</h4>
-                        <ol class="steps-list">
+                        <div class="steps-header" id="steps-toggle">
+                            <h4 class="steps-title">Étapes de préparation</h4>
+                            <span class="steps-chevron">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </div>
+                        <ol class="steps-list" id="steps-list">
                             ${stepsHtml}
                         </ol>
                     </div>
@@ -459,6 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     renderHistoryList();
+                    updateProfileStats();
                     
                     // Smooth scroll to top to see the loaded recipe
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -617,6 +623,42 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 2500); 
         });
     }
+    // ---- Gallery Import Simulation ----
+    const galleryBtn = document.getElementById('gallery-btn');
+    const galleryInput = document.getElementById('gallery-input');
+    
+    if (galleryBtn && galleryInput) {
+        galleryBtn.addEventListener('click', () => galleryInput.click());
+        
+        galleryInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                // Show AI Loading State
+                cameraState.classList.remove('hidden');
+
+                // Simulate AI Processing (same as camera)
+                setTimeout(() => {
+                    cameraState.classList.add('hidden');
+                    const mockedIngredients = "3 œufs, la moitié d'un poivron rouge, un reste de poulet rôti et un peu de fromage râpé";
+                    if (ingredientsInput.value.trim() === "") {
+                        ingredientsInput.value = mockedIngredients;
+                    } else {
+                        ingredientsInput.value += ", " + mockedIngredients;
+                    }
+                    ingredientsInput.dispatchEvent(new Event('input'));
+                    showToast("Image analysée avec succès !");
+                }, 2000);
+            }
+        });
+    }
+
+    // ---- Accordion Toggle Logic ----
+    // Delegated to resultsSection since it's dynamic
+    resultsSection.addEventListener('click', (e) => {
+        const stepsHeader = e.target.closest('.steps-header');
+        if (stepsHeader) {
+            stepsHeader.classList.toggle('collapsed');
+        }
+    });
 
     // ---- Bottom Navigation & Views ----
     const views = document.querySelectorAll('.view');
@@ -675,15 +717,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (data.preferences) {
-            prefBadges.forEach(btn => {
-                if (data.preferences.includes(btn.dataset.diet)) btn.classList.add('active');
+            // Switches in Profile
+            const prefSwitches = document.querySelectorAll('.pref-switch');
+            prefSwitches.forEach(sw => {
+                if (data.preferences.includes(sw.dataset.diet)) sw.checked = true;
+            });
+            
+            // Sync with Generator badges
+            badges.forEach(badge => {
+                if (data.preferences.includes(badge.textContent.trim())) {
+                    badge.classList.add('active');
+                }
             });
         }
+
+        updateProfileStats();
+    }
+
+    function updateProfileStats() {
+        const history = JSON.parse(localStorage.getItem('antiGaspiHistory') || '[]');
+        const statsCount = document.getElementById('stats-count');
+        const statsSaved = document.getElementById('stats-saved');
+        
+        if (statsCount) statsCount.textContent = history.length;
+        if (statsSaved) statsSaved.textContent = (history.length * 0.3).toFixed(1);
     }
 
     function saveProfileData() {
         const activeEquip = Array.from(document.querySelectorAll('.grid-btn.active')).map(b => b.dataset.equip);
-        const activePrefs = Array.from(document.querySelectorAll('#profile-diets .pref-badge.active')).map(b => b.dataset.diet);
+        const activePrefs = Array.from(document.querySelectorAll('.pref-switch:checked')).map(b => b.dataset.diet);
         
         const data = {
             username: usernameInput.value.trim(),
@@ -695,6 +757,15 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         localStorage.setItem('antiGaspiProfile', JSON.stringify(data));
         
+        // Auto-update Generator badges when profile changes
+        badges.forEach(badge => {
+            if (activePrefs.includes(badge.textContent.trim())) {
+                badge.classList.add('active');
+            } else {
+                badge.classList.remove('active');
+            }
+        });
+
         if (data.darkMode) document.body.classList.add('dark-mode');
         else document.body.classList.remove('dark-mode');
     }

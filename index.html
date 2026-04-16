@@ -43,12 +43,18 @@
                             placeholder="Qu'avez-vous dans le frigo ?&#10;Ex: tomates, poulet, riz, courgettes..."
                             rows="3"
                         ></textarea>
-                        <button class="camera-btn" id="camera-btn" aria-label="Prendre une photo">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                                <circle cx="12" cy="13" r="4"/>
-                            </svg>
-                        </button>
+                        <div class="input-actions">
+                            <input type="file" id="gallery-input" accept="image/*" hidden>
+                            <button class="icon-btn gallery-btn" id="gallery-btn" aria-label="Importer depuis la galerie">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            </button>
+                            <button class="icon-btn camera-btn" id="camera-btn" aria-label="Prendre une photo">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                    <circle cx="12" cy="13" r="4"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Meal Counter -->
@@ -200,8 +206,26 @@
             </header>
             <main class="main-content">
                 
+                <!-- Statistics Section -->
+                <section class="section stats-section">
+                    <div class="section-label">
+                        <span class="section-icon">📈</span>
+                        <span>Mes Statistiques</span>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-value" id="stats-count">0</span>
+                            <span class="stat-label">Recettes</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="stats-saved">0</span>
+                            <span class="stat-label">Kg sauvés</span>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Profile Form -->
-                <section class="section profile-section">
+                <section class="section profile-section" style="margin-top: 16px;">
                     
                     <!-- Ma Cuisine (Equipements) -->
                     <div class="profile-group">
@@ -226,10 +250,27 @@
                             <span>Mes Préférences</span>
                         </div>
                         <div class="diet-badges" id="profile-diets">
-                            <button class="badge pref-badge" data-diet="Végétarien">Végétarien</button>
-                            <button class="badge pref-badge" data-diet="Vegan">Vegan</button>
-                            <button class="badge pref-badge" data-diet="Sans Gluten">Sans Gluten</button>
-                            <button class="badge pref-badge" data-diet="Sans Lactose">Sans Lactose</button>
+                            <div class="switch-item">
+                                <span class="switch-label">Végétarien</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" class="pref-switch" data-diet="Végétarien">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="switch-item">
+                                <span class="switch-label">Vegan</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" class="pref-switch" data-diet="Vegan">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="switch-item">
+                                <span class="switch-label">Sans Gluten</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" class="pref-switch" data-diet="Sans Gluten">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
