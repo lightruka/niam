@@ -386,12 +386,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ---- Camera Button ----
-    cameraBtn.addEventListener('click', () => {
+    // ---- Camera Modal Logic ----
+    const cameraModal = document.getElementById('camera-modal');
+    const cameraVideo = document.getElementById('camera-feed');
+    const cameraCanvas = document.getElementById('camera-canvas');
+    const closeCameraBtn = document.getElementById('camera-close-btn');
+    const snapBtn = document.getElementById('snap-btn');
+    const cameraState = document.getElementById('camera-state');
+    const ingredientsInput = document.getElementById('ingredients-input');
+    
+    let cameraStream = null;
+
+    function stopCamera() {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
+        if (cameraVideo) {
+            cameraVideo.srcObject = null;
+        }
+    }
+
+    cameraBtn.addEventListener('click', async () => {
         cameraBtn.style.transform = 'scale(.85)';
         setTimeout(() => cameraBtn.style.transform = 'scale(1)', 200);
-        alert('📸 La fonctionnalité caméra sera bientôt disponible !');
+
+        try {
+            cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment' } 
+            });
+            cameraVideo.srcObject = cameraStream;
+            cameraModal.classList.remove('hidden');
+        } catch (err) {
+            console.error("Camera error:", err);
+            alert("Impossible d'accéder à la caméra. Vérifiez les permissions de votre navigateur.");
+        }
     });
+
+    if (closeCameraBtn) {
+        closeCameraBtn.addEventListener('click', () => {
+            stopCamera();
+            cameraModal.classList.add('hidden');
+            cameraState.classList.add('hidden');
+        });
+    }
+
+    if (snapBtn) {
+        snapBtn.addEventListener('click', () => {
+            if (!cameraStream) return;
+            
+            // Pause video to "freeze" the frame visually
+            cameraVideo.pause();
+
+            // Show AI Loading State
+            cameraState.classList.remove('hidden');
+
+            // Simulate AI Processing
+            setTimeout(() => {
+                // Resume and stop safely
+                cameraVideo.play().catch(e => { /* ignore */ });
+                stopCamera();
+                cameraModal.classList.add('hidden');
+                cameraState.classList.add('hidden');
+                
+                // Set mocked ingredients
+                const mockedIngredients = "3 œufs, la moitié d'un poivron rouge, un reste de poulet rôti et un peu de fromage râpé";
+
+                if (ingredientsInput.value.trim() === "") {
+                    ingredientsInput.value = mockedIngredients;
+                } else {
+                    ingredientsInput.value += ", " + mockedIngredients;
+                }
+                
+                // Trigger auto-resize
+                ingredientsInput.dispatchEvent(new Event('input'));
+            }, 2500); 
+        });
+    }
 
     // ---- Bottom Navigation & Views ----
     const views = document.querySelectorAll('.view');

@@ -280,6 +280,39 @@
                 <span>Profil</span>
             </button>
         </nav>
+
+        <!-- ========== CAMERA MODAL ========== -->
+        <div class="camera-modal hidden" id="camera-modal">
+            <video id="camera-feed" class="camera-video" autoplay playsinline></video>
+            <canvas id="camera-canvas" class="hidden"></canvas>
+            
+            <div class="camera-overlay">
+                <div class="camera-header">
+                    <button class="camera-close-btn" id="camera-close-btn" aria-label="Fermer la caméra">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                    <h3>Scanner des ingrédients</h3>
+                </div>
+                
+                <div class="camera-scanner-frame">
+                    <div class="corner top-left"></div>
+                    <div class="corner top-right"></div>
+                    <div class="corner bottom-left"></div>
+                    <div class="corner bottom-right"></div>
+                </div>
+
+                <div class="camera-controls">
+                    <button class="snap-btn" id="snap-btn" aria-label="Prendre la photo">
+                        <div class="snap-inner"></div>
+                    </button>
+                </div>
+
+                <div class="camera-state hidden" id="camera-state">
+                    <div class="spinner-large"></div>
+                    <p>Analyse de l'image par l'IA...</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
