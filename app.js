@@ -140,42 +140,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Render output
             renderAIResults(ingredients, meals, pTime, allDiets, difficulty, isBudget, eqp, username);
-
-            // Show results
-            resultsSection.classList.remove('hidden');
-
-            // Smooth scroll down
-            setTimeout(() => {
-                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
         }, 2200);
     });
 
     // ---- Dynamic Rendering of AI Response ----
     function renderAIResults(ingredients, numMeals, pTime, diets, difficulty, isBudget, eqp, username) {
         let recipesHtml = '';
+        let totalCals = 0;
+        let firstTitle = "Menu Anti-Gaspi";
         
         for(let i=0; i < numMeals; i++) {
-            const mainIng = ingredients[i % ingredients.length];
-            const secondaryIng = ingredients[(i+1) % ingredients.length] || 'petits légumes';
-            const cals = 300 + Math.floor(Math.random() * 250);
+            const cals = 350 + Math.floor(Math.random() * 200);
+            totalCals += cals;
             
             // Adjust time roughly based on prep-time selected
             const baseTime = parseInt(pTime);
             const time = baseTime === 15 ? 15 : (baseTime === 30 ? 25 : baseTime - 5);
             
-            // Varied titles based on ingredients
+            // Varied titles generically
             const titles = [
-                `Poêlée créative de ${mainIng} et ${secondaryIng}`,
-                `Gratin express aux ${mainIng}`,
-                `Salade tiède de ${mainIng} rôti(s)`,
-                `Bowl anti-gaspi : ${mainIng} & ${secondaryIng}`
+                "Poêlée créative aux saveurs du frigo",
+                "Gratin express du chef",
+                "Salade estivale composée",
+                "Mijoté réconfortant anti-gaspi",
+                "Assiette équilibrée et colorée"
             ];
             const dietStr = diets.length > 0 ? ` (${diets[0]})` : '';
             const diffStr = difficulty === 'expert' ? ' 👨‍🍳' : (difficulty === 'facile' ? ' 🌱' : '');
             let title = (isBudget ? "Éco: " : "") + titles[i % titles.length] + dietStr + diffStr;
 
-            const equipStr = eqp.length > 0 ? `Cuisiné avec : ${eqp.join(', ')}` : "Préparez vos ustensiles.";
+            if (i === 0) firstTitle = title;
+
+            const equipStr = eqp.length > 0 ? `Utilisez : ${eqp.join(', ')}.` : "Préparez vos ustensiles.";
 
             // Check if already favorite
             const favs = JSON.parse(localStorage.getItem('antiGaspiFavorites') || '[]');
@@ -200,15 +196,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         <ol class="steps-list">
                             <li>
                                 <span class="step-number">1</span>
-                                <span class="step-text">Lavez et préparez vos ${mainIng} et ${secondaryIng}. ${equipStr}</span>
+                                <span class="step-text">Nettoyez, épluchez et découpez vos ingrédients frais restants en cubes réguliers. ${equipStr}</span>
                             </li>
                             <li>
                                 <span class="step-number">2</span>
-                                <span class="step-text">Faites dorer les ${mainIng} avec un filet d'huile (ou beurre).</span>
+                                <span class="step-text">Faites revenir le tout dans une poêle bien chaude avec un filet d'huile d'olive (ou beurre). Salez et poivrez selon votre goût.</span>
                             </li>
                             <li>
                                 <span class="step-number">3</span>
-                                <span class="step-text">Ajoutez les restes de ${secondaryIng} et assaisonnez bien. Laissez mijoter et servez chaud !</span>
+                                <span class="step-text">Laissez mijoter doucement pour lier les saveurs, puis dressez dans une belle assiette. Servez bien chaud !</span>
                             </li>
                         </ol>
                     </div>
@@ -268,11 +264,40 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
 
             <!-- Eco tip -->
-            <div class="eco-tip" id="eco-tip">
+            <div class="eco-tip animate-in" id="eco-tip" style="animation-delay: 0.3s;">
                 <span class="eco-icon">💡</span>
                 <p>En utilisant vos restes, vous évitez de gaspiller environ <strong>${(numMeals * 0.4).toFixed(1)} kg</strong> de nourriture cette semaine. Bravo !</p>
             </div>
         `;
+
+        resultsSection.classList.remove('hidden');
+
+        // ==== HISTORY SAVING ====
+        const fullHtml = resultsSection.innerHTML;
+        const mainDate = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        
+        let history = JSON.parse(localStorage.getItem('antiGaspiHistory') || '[]');
+        history.unshift({
+            id: 'hist_' + Date.now(),
+            title: firstTitle,
+            date: mainDate,
+            calories: totalCals + ' kcal',
+            html: fullHtml
+        });
+        
+        if(history.length > 10) history = history.slice(0, 10);
+        localStorage.setItem('antiGaspiHistory', JSON.stringify(history));
+        
+        // Render history list
+        if (typeof renderHistoryList === 'function') {
+            renderHistoryList();
+        }
+        
+        // Auto-navigate to History Tab
+        setTimeout(() => {
+            const navHist = document.getElementById('nav-history');
+            if (navHist) navHist.click();
+        }, 100);
     }
 
     // ---- Favorites Storage & Rendering ----
@@ -342,6 +367,86 @@ document.addEventListener('DOMContentLoaded', () => {
             favoritesContainer.innerHTML = html;
         }
     }
+
+    // ---- History Storage & Rendering ----
+    const historyListContainer = document.getElementById('history-list');
+
+    function renderHistoryList() {
+        if (!historyListContainer) return;
+        const history = JSON.parse(localStorage.getItem('antiGaspiHistory') || '[]');
+        
+        if (history.length === 0) {
+            historyListContainer.innerHTML = '<p style="text-align:center; color:var(--clr-text-muted); font-size:.9rem; margin-top:20px;">Aucune recette passée.</p>';
+            return;
+        }
+
+        let html = '';
+        const prevRecipes = history.slice(1);
+        
+        if (prevRecipes.length === 0) {
+            historyListContainer.innerHTML = '<p style="text-align:center; color:var(--clr-text-muted); font-size:.9rem; margin-top:20px;">Aucune autre recette précédente.</p>';
+        } else {
+            prevRecipes.forEach(h => {
+                html += `
+                    <div class="history-item" data-id="${h.id}">
+                        <div class="history-info">
+                            <span class="history-title">${h.title}</span>
+                            <div class="history-meta">
+                                <span>📅 ${h.date}</span>
+                                <span class="history-calories">${h.calories}</span>
+                            </div>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--clr-text-muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                `;
+            });
+            historyListContainer.innerHTML = html;
+        }
+        
+        // Ensure index 0 is visible in #results-section on reload
+        const resultsSectionElement = document.getElementById('results-section');
+        if (resultsSectionElement && resultsSectionElement.innerHTML.trim() === '' && history.length > 0) {
+            resultsSectionElement.innerHTML = history[0].html;
+            resultsSectionElement.classList.remove('hidden');
+        }
+    }
+
+    if (historyListContainer) {
+        historyListContainer.addEventListener('click', (e) => {
+            const item = e.target.closest('.history-item');
+            if (item) {
+                const id = item.getAttribute('data-id');
+                let history = JSON.parse(localStorage.getItem('antiGaspiHistory') || '[]');
+                
+                const targetIdx = history.findIndex(h => h.id === id);
+                if (targetIdx !== -1) {
+                    // Make it the active one at index 0
+                    const selected = history.splice(targetIdx, 1)[0];
+                    history.unshift(selected); 
+                    localStorage.setItem('antiGaspiHistory', JSON.stringify(history));
+                    
+                    // Reload UI
+                    const resultsSectionElement = document.getElementById('results-section');
+                    resultsSectionElement.innerHTML = selected.html;
+                    resultsSectionElement.classList.remove('hidden');
+                    
+                    // Re-run animations smoothly
+                    const cards = resultsSectionElement.querySelectorAll('.result-card, .eco-tip');
+                    cards.forEach(c => {
+                        c.style.animation = 'none';
+                        c.offsetHeight;
+                        c.style.animation = null;
+                    });
+
+                    renderHistoryList();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+        });
+    }
+
+    // Call it on init
+    renderHistoryList();
 
     // Delegation in Results View
     resultsSection.addEventListener('click', (e) => {

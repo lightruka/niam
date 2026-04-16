@@ -1008,6 +1008,65 @@ button {
     font-size: 0.95rem;
 }
 
+/* ---------- HISTORY LIST ---------- */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 20px;
+}
+
+.history-item {
+    background: var(--clr-surface);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--r-md);
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all var(--dur) var(--ease);
+    box-shadow: var(--shadow-sm);
+}
+
+.history-item:hover {
+    border-color: var(--clr-primary);
+    transform: translateY(-1px);
+    background: linear-gradient(to right, var(--clr-surface), var(--clr-surface-2));
+}
+
+.history-item:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.history-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.history-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--clr-text);
+}
+
+.history-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .8rem;
+    color: var(--clr-text-muted);
+}
+
+.history-calories {
+    background: var(--clr-primary-light);
+    color: var(--clr-primary);
+    padding: 2px 6px;
+    border-radius: var(--r-sm);
+    font-weight: 600;
+}
+
 /* ---------- PROFILE SECTION ---------- */
 .profile-section {
     background: var(--clr-surface);
