@@ -1,5 +1,5 @@
 /* ============================================
-   Anti-Gaspi Chef — Design System & Styles
+   Niam ! — Design System & Styles
    ============================================ */
 
 /* ---------- CSS Custom Properties ---------- */
@@ -166,11 +166,12 @@ button {
 }
 
 .hero-title {
-    font-size: 2rem;
-    font-weight: 700;
+    font-size: 3rem;
+    font-weight: 800;
     color: #fff;
     margin-bottom: 6px;
-    text-shadow: 0 2px 12px rgba(0,0,0,.25);
+    text-shadow: 0 4px 16px rgba(0,0,0,.3);
+    letter-spacing: -0.01em;
 }
 
 .hero-subtitle {

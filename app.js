@@ -1,5 +1,5 @@
 /* ============================================
-   Anti-Gaspi Chef — Application Logic
+   Niam ! — Application Logic
    ============================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderAIResults(ingredients, numMeals, pTime, diets, difficulty, isBudget, eqp, username) {
         let recipesHtml = '';
         let totalCals = 0;
-        let firstTitle = "Menu Anti-Gaspi";
+        let firstTitle = "Menu Niam !";
         
         for(let i=0; i < numMeals; i++) {
             const cals = 350 + Math.floor(Math.random() * 200);
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 "Poêlée créative aux saveurs du frigo",
                 "Gratin express du chef",
                 "Salade estivale composée",
-                "Mijoté réconfortant anti-gaspi",
+                "Mijoté réconfortant Niam !",
                 "Assiette équilibrée et colorée"
             ];
             const dietStr = diets.length > 0 ? ` (${diets[0]})` : '';
@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         });
 
-        const chefName = username ? `Chef ${username}` : "l'IA Anti-Gaspi";
+        const chefName = username ? `Chef ${username}` : "Niam !";
 
         resultsSection.innerHTML = `
             <!-- Menu Card -->
