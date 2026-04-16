@@ -2,6 +2,7 @@
    Niam ! — Application Logic
    ============================================ */
 
+
 document.addEventListener('DOMContentLoaded', () => {
     // ---- DOM Elements ----
     const mealCount     = document.getElementById('meal-count');
@@ -98,23 +99,23 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // ---- Generate Button (Simulated AI) ----
-    generateBtn.addEventListener('click', () => {
+    // ---- Generate Button (Gemini AI) ----
+    generateBtn.addEventListener('click', async () => {
         // Form Validation
         const ingredientsInput = document.getElementById('ingredients-input');
         if (!ingredientsInput.value.trim()) {
             ingredientsInput.classList.add('shake-error');
-            setTimeout(() => ingredientsInput.classList.remove('shake-error'), 400); // match animation duration
+            setTimeout(() => ingredientsInput.classList.remove('shake-error'), 400); 
             showToast("Veuillez indiquer ce qu'il vous reste !");
-            return; // STOP execution
+            return;
         }
 
         // Collect user data
-        const ingredients = ingredientsInput.value.trim().split(',').map(i => i.trim()).filter(i => i);
+        const ingredientsText = ingredientsInput.value.trim();
         const pTime = document.getElementById('prep-time').value || "30";
         const dietLabels = Array.from(document.querySelectorAll('#view-generator .badge.active')).map(b => b.textContent.trim());
 
-        // Merge with Profile Data!
+        // Merge with Profile Data
         const profileData = JSON.parse(localStorage.getItem('antiGaspiProfile') || '{}');
         const userDiets = profileData.preferences || [];
         const allDiets = [...new Set([...dietLabels, ...userDiets])];
@@ -128,108 +129,86 @@ document.addEventListener('DOMContentLoaded', () => {
         btnContent.classList.add('hidden');
         btnLoading.classList.remove('hidden');
         
-        // Hide previous results if any
+        // Hide previous results
         resultsSection.classList.add('hidden');
 
-        // Simulate AI network delay
-        setTimeout(() => {
+        try {
+            const response = await fetch("/api/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ingredientsText,
+                    pTime,
+                    allDiets,
+                    difficulty,
+                    isBudget,
+                    eqp
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Erreur serveur");
+            }
+
+            const recipeData = await response.json();
+
+
             // Restore button
             generateBtn.classList.remove('loading');
             btnContent.classList.remove('hidden');
             btnLoading.classList.add('hidden');
 
-            // Render output
-            renderAIResults(ingredients, meals, pTime, allDiets, difficulty, isBudget, eqp, username);
-        }, 2200);
+            // Render output with REAL data
+            renderGeminiResults(recipeData, meals, username);
+
+        } catch (err) {
+            console.error("Gemini Error:", err);
+            generateBtn.classList.remove('loading');
+            btnContent.classList.remove('hidden');
+            btnLoading.classList.add('hidden');
+            showToast("Oups ! Niam ! a eu un souci de connexion. Réessayez ?");
+        }
     });
 
-    // ---- Dynamic Rendering of AI Response ----
-    function renderAIResults(ingredients, numMeals, pTime, diets, difficulty, isBudget, eqp, username) {
-        let recipesHtml = '';
-        let totalCals = 0;
-        let firstTitle = "Menu Niam !";
-        
-        for(let i=0; i < numMeals; i++) {
-            const cals = 350 + Math.floor(Math.random() * 200);
-            totalCals += cals;
-            
-            // Adjust time roughly based on prep-time selected
-            const baseTime = parseInt(pTime);
-            const time = baseTime === 15 ? 15 : (baseTime === 30 ? 25 : baseTime - 5);
-            
-            // Varied titles generically
-            const titles = [
-                "Poêlée créative aux saveurs du frigo",
-                "Gratin express du chef",
-                "Salade estivale composée",
-                "Mijoté réconfortant Niam !",
-                "Assiette équilibrée et colorée"
-            ];
-            const dietStr = diets.length > 0 ? ` (${diets[0]})` : '';
-            const diffStr = difficulty === 'expert' ? ' 👨‍🍳' : (difficulty === 'facile' ? ' 🌱' : '');
-            let title = (isBudget ? "Éco: " : "") + titles[i % titles.length] + dietStr + diffStr;
+    // ---- Dynamic Rendering of Gemini AI Response ----
+    function renderGeminiResults(data, numMeals, username) {
+        if (!data || !data.titre) return;
 
-            if (i === 0) firstTitle = title;
+        // Extract clean data
+        const title = data.titre;
+        const timeStr = data.temps || "20 min";
+        const calStr = data.calories || "350 kcal";
+        const steps = data.etapes || [];
+        const missing = data.courses_manquantes || [];
 
-            const equipStr = eqp.length > 0 ? `Utilisez : ${eqp.join(', ')}.` : "Préparez vos ustensiles.";
-
-            // Check if already favorite
-            const favs = JSON.parse(localStorage.getItem('antiGaspiFavorites') || '[]');
-            const isFav = favs.some(f => f.id === title.trim());
-            const activeClass = isFav ? 'active' : '';
-
-            recipesHtml += `
-                <div class="recipe" id="recipe-${i+1}">
-                    <div class="recipe-header">
-                        <h3 class="recipe-name">${title}</h3>
-                        <button class="fav-btn ${activeClass}" id="fav-btn-${i+1}" aria-label="Ajouter aux favoris">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                        </button>
-                    </div>
-                    <div class="recipe-meta">
-                        <span class="meta-tag"><span class="meta-icon">🔥</span> ${cals} kcal</span>
-                        <span class="meta-tag"><span class="meta-icon">⏱️</span> ${time} min</span>
-                        <span class="meta-tag"><span class="meta-icon">👥</span> 2 pers.</span>
-                    </div>
-                    <div class="recipe-steps">
-                        <h4 class="steps-title">Étapes de préparation</h4>
-                        <ol class="steps-list">
-                            <li>
-                                <span class="step-number">1</span>
-                                <span class="step-text">Nettoyez, épluchez et découpez vos ingrédients frais restants en cubes réguliers. ${equipStr}</span>
-                            </li>
-                            <li>
-                                <span class="step-number">2</span>
-                                <span class="step-text">Faites revenir le tout dans une poêle bien chaude avec un filet d'huile d'olive (ou beurre). Salez et poivrez selon votre goût.</span>
-                            </li>
-                            <li>
-                                <span class="step-number">3</span>
-                                <span class="step-text">Laissez mijoter doucement pour lier les saveurs, puis dressez dans une belle assiette. Servez bien chaud !</span>
-                            </li>
-                        </ol>
-                    </div>
-                </div>
-                ${i < numMeals - 1 ? '<hr class="recipe-divider">' : ''}
-            `;
-        }
-
-        const shoppingItems = ['Huile d\'olive', 'Ail & Oignon', 'Bouillon de légumes', 'Herbes fraîches'];
-        const neededItemsCount = Math.max(2, Math.floor(Math.random() * 4) + 1);
-        const neededItems = shoppingItems.slice(0, neededItemsCount);
-        
-        let shoppingHtml = '';
-        neededItems.forEach((item, idx) => {
-            shoppingHtml += `
-                <li class="shopping-item">
-                    <label class="checkbox-wrapper">
-                        <input type="checkbox" id="item-${idx}">
-                        <span class="custom-checkbox"></span>
-                        <span class="item-text">${item}</span>
-                    </label>
-                    <span class="item-qty">1</span>
+        let stepsHtml = '';
+        steps.forEach((step, idx) => {
+            stepsHtml += `
+                <li>
+                    <span class="step-number">${idx + 1}</span>
+                    <span class="step-text">${step}</span>
                 </li>
             `;
         });
+
+        let shoppingHtml = '';
+        if (missing.length === 0) {
+            shoppingHtml = '<p style="padding:10px 0; font-size:.9rem; color:var(--clr-accent);">Rien du tout ! Vous avez tout ce qu\'il faut. 🎉</p>';
+        } else {
+            missing.forEach((item, idx) => {
+                shoppingHtml += `
+                    <li class="shopping-item">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" id="item-${idx}">
+                            <span class="custom-checkbox"></span>
+                            <span class="item-text">${item}</span>
+                        </label>
+                        <span class="item-qty">1</span>
+                    </li>
+                `;
+            });
+        }
 
         const chefName = username ? `Chef ${username}` : "Niam !";
 
@@ -243,7 +222,26 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="card-subtitle">Généré pour ${chefName}</p>
                     </div>
                 </div>
-                ${recipesHtml}
+                
+                <div class="recipe" id="recipe-active">
+                    <div class="recipe-header">
+                        <h3 class="recipe-name">${title}</h3>
+                        <button class="fav-btn" id="fav-btn-active" aria-label="Ajouter aux favoris">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        </button>
+                    </div>
+                    <div class="recipe-meta">
+                        <span class="meta-tag"><span class="meta-icon">🔥</span> ${calStr}</span>
+                        <span class="meta-tag"><span class="meta-icon">⏱️</span> ${timeStr}</span>
+                        <span class="meta-tag"><span class="meta-icon">👥</span> 2 pers.</span>
+                    </div>
+                    <div class="recipe-steps">
+                        <h4 class="steps-title">Étapes de préparation</h4>
+                        <ol class="steps-list">
+                            ${stepsHtml}
+                        </ol>
+                    </div>
+                </div>
             </div>
 
             <!-- Shopping List Card -->
@@ -259,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${shoppingHtml}
                 </ul>
                 <div class="shopping-footer">
-                    <span class="items-done" id="items-done">0 / ${neededItems.length} achetés</span>
+                    <span class="items-done" id="items-done">0 / ${missing.length} achetés</span>
                 </div>
             </div>
 
@@ -279,26 +277,23 @@ document.addEventListener('DOMContentLoaded', () => {
         let history = JSON.parse(localStorage.getItem('antiGaspiHistory') || '[]');
         history.unshift({
             id: 'hist_' + Date.now(),
-            title: firstTitle,
+            title: title,
             date: mainDate,
-            calories: totalCals + ' kcal',
+            calories: calStr,
             html: fullHtml
         });
         
         if(history.length > 10) history = history.slice(0, 10);
         localStorage.setItem('antiGaspiHistory', JSON.stringify(history));
         
-        // Render history list
-        if (typeof renderHistoryList === 'function') {
-            renderHistoryList();
-        }
+        if (typeof renderHistoryList === 'function') renderHistoryList();
         
-        // Auto-navigate to History Tab
         setTimeout(() => {
             const navHist = document.getElementById('nav-history');
             if (navHist) navHist.click();
         }, 100);
     }
+
 
     // ---- Favorites Storage & Rendering ----
     const favoritesContainer = document.getElementById('favorites-container');
