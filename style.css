@@ -1696,14 +1696,10 @@ body.camera-open {
 .auth-logo {
     width: 90px;
     height: 90px;
-    background: linear-gradient(135deg, var(--clr-primary) 0%, #B86525 100%);
-    border-radius: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 28px;
-    font-size: 2.8rem;
-    box-shadow: 0 12px 32px var(--clr-primary-glow);
     animation: logoFloat 3.5s ease-in-out infinite;
 }
 
