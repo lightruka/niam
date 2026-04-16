@@ -1243,16 +1243,18 @@ button {
 }
 
 /* ---------- CAMERA MODAL ---------- */
+body.camera-open {
+    overflow: hidden !important;
+}
+
 .camera-modal {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     background-color: #000;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
+    z-index: 9999;
 }
 
 .camera-video {
@@ -1262,50 +1264,45 @@ button {
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-.camera-overlay {
-    position: relative;
-    z-index: 2;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.camera-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 24px 20px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
-    color: #fff;
-}
-
-.camera-header h3 {
-    font-size: 1.1rem;
-    font-weight: 500;
+    z-index: 1;
 }
 
 .camera-close-btn {
-    background: transparent;
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: rgba(0,0,0,0.5);
     border: none;
     color: #fff;
-    padding: 4px;
+    font-size: 1.2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
     cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .camera-scanner-frame {
-    flex: 1;
-    margin: 40px;
-    position: relative;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 50%;
+    max-width: 400px;
+    max-height: 400px;
+    z-index: 3;
+    pointer-events: none;
 }
 
 .corner {
     position: absolute;
     width: 40px;
     height: 40px;
-    border-color: rgba(255,255,255,0.6);
+    border-color: rgba(255,255,255,0.8);
     border-style: solid;
 }
 
@@ -1314,15 +1311,11 @@ button {
 .corner.bottom-left { bottom: 0; left: 0; border-width: 0 0 4px 4px; border-bottom-left-radius: 12px; }
 .corner.bottom-right { bottom: 0; right: 0; border-width: 0 4px 4px 0; border-bottom-right-radius: 12px; }
 
-.camera-controls {
-    padding: 20px 0 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-}
-
 .snap-btn {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
     width: 76px;
     height: 76px;
     border-radius: 50%;
@@ -1332,11 +1325,12 @@ button {
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    z-index: 10;
     transition: transform 0.2s ease;
 }
 
 .snap-btn:active {
-    transform: scale(0.9);
+    transform: translateX(-50%) scale(0.9);
 }
 
 .snap-inner {

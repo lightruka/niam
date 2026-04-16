@@ -434,6 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             cameraVideo.srcObject = cameraStream;
             cameraModal.classList.remove('hidden');
+            document.body.classList.add('camera-open');
         } catch (err) {
             console.error("Camera error:", err);
             alert("Impossible d'accéder à la caméra. Vérifiez les permissions de votre navigateur.");
@@ -445,6 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
             stopCamera();
             cameraModal.classList.add('hidden');
             cameraState.classList.add('hidden');
+            document.body.classList.remove('camera-open');
         });
     }
 
@@ -472,6 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 stopCamera();
                 cameraModal.classList.add('hidden');
                 cameraState.classList.add('hidden');
+                document.body.classList.remove('camera-open');
                 
                 // Set mocked ingredients
                 const mockedIngredients = "3 œufs, la moitié d'un poivron rouge, un reste de poulet rôti et un peu de fromage râpé";
