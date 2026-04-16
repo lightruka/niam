@@ -1767,4 +1767,15 @@ body.camera-open {
     font-size: 0.85rem;
     color: var(--clr-text-muted);
     line-height: 1.4;
+    transition: color 0.3s ease;
+}
+
+.auth-info.success {
+    color: #4CAF50; /* Green */
+    font-weight: 500;
+}
+
+.auth-info.error {
+    color: var(--clr-danger); /* Red */
+    font-weight: 500;
 }
