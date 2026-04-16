@@ -1,9 +1,77 @@
-/* ============================================
-   Niam ! — Application Logic
-   ============================================ */
-
+const SUPABASE_URL = 'https://djceirgdjudaqxhdqlvg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqY2VpcmdkanVkYXF4aGRxbHZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNjU1NjksImV4cCI6MjA5MTk0MTU2OX0._B7ejOaEMatK3Qqiboe-bV_dXORSsfDwzouC8bRJBgE';
+const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 document.addEventListener('DOMContentLoaded', () => {
+    // ---- Supabase Auth Logic ----
+    const viewAuth = document.getElementById('view-auth');
+    const authForm = document.getElementById('auth-form');
+    const authEmail = document.getElementById('auth-email');
+    const bottomNav = document.getElementById('bottom-nav');
+
+    async function checkSession() {
+        if (!supabase) return;
+        const { data: { session } } = await supabase.auth.getSession();
+        handleAuthState(session);
+    }
+
+    function handleAuthState(session) {
+        if (session) {
+            // User is logged in
+            viewAuth.classList.remove('active');
+            bottomNav.classList.remove('hidden');
+            switchToView('generator');
+            loadRecipesFromCloud(); // Fetch from DB
+        } else {
+            // User is NOT logged in
+            viewAuth.classList.add('active');
+            bottomNav.classList.add('hidden');
+            document.querySelectorAll('.view').forEach(v => {
+                if (v.id !== 'view-auth') v.classList.remove('active', 'animating');
+            });
+        }
+    }
+
+    if (supabase) {
+        supabase.auth.onAuthStateChange((_event, session) => {
+            handleAuthState(session);
+        });
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = authEmail.value.trim();
+            const submitBtn = document.getElementById('auth-submit');
+            
+            submitBtn.disabled = true;
+            submitBtn.querySelector('.btn-content').textContent = "Lien en cours...";
+
+            const { error } = await supabase.auth.signInWithOtp({
+                email,
+                options: { emailRedirectTo: window.location.href }
+            });
+
+            if (error) {
+                showToast("❌ Erreur : " + error.message);
+                submitBtn.disabled = false;
+                submitBtn.querySelector('.btn-content').textContent = "Se connecter";
+            } else {
+                showToast("📩 Lien envoyé ! Vérifiez vos mails.");
+                submitBtn.querySelector('.btn-content').textContent = "Vérifiez vos emails !";
+            }
+        });
+    }
+
+    function switchToView(tabName) {
+        const targetView = document.getElementById(`view-${tabName}`);
+        const targetNavItem = document.querySelector(`.nav-item[data-tab="${tabName}"]`);
+        
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active', 'animating'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        
+        if (targetView) targetView.classList.add('active');
+        if (targetNavItem) targetNavItem.classList.add('active');
+    }
+
     // ---- DOM Elements ----
     const mealCount     = document.getElementById('meal-count');
     const btnMinus      = document.getElementById('btn-minus');
@@ -289,28 +357,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         resultsSection.classList.remove('hidden');
 
-        // ==== HISTORY SAVING ====
+        // ==== HISTORY SAVING (CLOUD) ====
         const fullHtml = resultsSection.innerHTML;
-        const mainDate = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
         
-        let history = JSON.parse(localStorage.getItem('antiGaspiHistory') || '[]');
-        history.unshift({
-            id: 'hist_' + Date.now(),
+        saveRecipeToCloud({
             title: title,
-            date: mainDate,
-            calories: calStr,
             html: fullHtml
+        }).then(() => {
+            loadRecipesFromCloud(); // Refresh history view
         });
         
-        if(history.length > 10) history = history.slice(0, 10);
-        localStorage.setItem('antiGaspiHistory', JSON.stringify(history));
-        
-        if (typeof renderHistoryList === 'function') renderHistoryList();
-        
+        // Auto-navigate to history to see the result
         setTimeout(() => {
             const navHist = document.getElementById('nav-history');
             if (navHist) navHist.click();
-        }, 100);
+        }, 150);
     }
 
 
@@ -867,9 +928,86 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initialize Profile state
-    loadProfileData();
+    // ---- Cloud Storage Logic (Supabase) ----
+    async function saveRecipeToCloud(recipe) {
+        if (!supabase) return;
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-    // Initialize counter state
+        const { error } = await supabase
+            .from('recipes')
+            .insert([{ 
+                user_id: user.id, 
+                title: recipe.title, 
+                content: recipe.html,
+                created_at: new Date()
+            }]);
+
+        if (error) console.error("Error saving to cloud:", error);
+    }
+
+    async function loadRecipesFromCloud() {
+        if (!supabase) return;
+        const { data: recipes, error } = await supabase
+            .from('recipes')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error("Error loading recipes:", error);
+            return;
+        }
+
+        renderHistoryListFromDB(recipes);
+    }
+
+    function renderHistoryListFromDB(recipes) {
+        const historyList = document.getElementById('history-list');
+        const resultsSection = document.getElementById('results-section');
+        
+        if (!historyList) return;
+        historyList.innerHTML = '';
+        
+        if (recipes.length === 0) {
+            historyList.innerHTML = '<div class="empty-state"><h3>Aucune recette archivée</h3><p>Vos créations apparaîtront ici.</p></div>';
+            return;
+        }
+
+        // 1. Show latest in "À la une"
+        resultsSection.innerHTML = recipes[0].content;
+        resultsSection.classList.remove('hidden');
+
+        // 2. Render the rest in the list
+        recipes.slice(1, 11).forEach(recipe => {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            
+            // Extract some metadata if possible or use generic
+            item.innerHTML = `
+                <div class="history-info">
+                    <span class="history-icon-small">🥘</span>
+                    <div class="history-text-wrapper">
+                        <span class="history-title">${recipe.title || "Recette sans nom"}</span>
+                        <div class="history-meta">
+                            <span>${new Date(recipe.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                </div>
+                <svg class="history-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            `;
+            
+            item.addEventListener('click', () => {
+                resultsSection.innerHTML = recipe.content;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                switchToView('history');
+            });
+            
+            historyList.appendChild(item);
+        });
+    }
+
+    // Initialize state
+    loadProfileData();
     updateCounter();
+    checkSession();
 });
