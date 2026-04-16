@@ -43,8 +43,8 @@ export default async function handler(req, res) {
 
         if (!response.ok) {
             const errorBody = await response.text();
-            console.error("Gemini API Error:", errorBody);
-            throw new Error("Erreur lors de la communication avec l'IA Google.");
+            console.error("Détails Backend (Gemini API Error):", errorBody);
+            throw new Error(errorBody);
         }
 
         const data = await response.json();
@@ -62,12 +62,15 @@ export default async function handler(req, res) {
             const recipeData = JSON.parse(cleanJsonText);
             return res.status(200).json(recipeData);
         } catch (parseErr) {
-            console.error("JSON Parse Error:", cleanJsonText);
+            console.error("Détails Backend (JSON Parse Error):", cleanJsonText);
             throw new Error("L'IA a généré une réponse mal formatée.");
         }
 
     } catch (err) {
-        console.error("Serverless Function Error:", err.message);
-        return res.status(500).json({ error: err.message || "Une erreur interne est survenue." });
+        console.error("Détails Backend (Serverless Function Error):", err.message);
+        return res.status(500).json({ 
+            error: "Erreur API", 
+            details: err.message || "Une erreur interne est survenue." 
+        });
     }
 }
