@@ -1223,7 +1223,8 @@ input:checked + .toggle-slider:before {
 }
 
 /* ---------- PROFILE SECTION ---------- */
-.profile-section {
+.profile-section,
+.settings-section {
     background: var(--clr-surface);
     border-radius: var(--r-lg);
     padding: 24px;
