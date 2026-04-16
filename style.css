@@ -929,11 +929,22 @@ button {
     font-size: .68rem;
     font-weight: 600;
     letter-spacing: .02em;
-    transition: all var(--dur) var(--ease);
+    transition: all .2s var(--ease);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.nav-item:active {
+    transform: scale(0.92);
+    background: var(--clr-primary-light);
+    color: var(--clr-primary);
 }
 
 .nav-item svg {
-    transition: all var(--dur) var(--ease);
+    transition: transform .2s var(--ease);
+}
+
+.nav-item:active svg {
+    transform: translateY(-2px);
 }
 
 .nav-item:hover {
@@ -967,11 +978,19 @@ button {
 /* ---------- VIEWS & PAGE HEADERS ---------- */
 .view {
     display: none;
-    animation: fadeIn .3s var(--ease) both;
+    opacity: 0;
+    transform: translateY(16px);
+}
+
+.view.animating {
+    display: block; /* Prepare for animation */
 }
 
 .view.active {
     display: block;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
 }
 
 .page-header {

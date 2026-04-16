@@ -665,21 +665,49 @@ document.addEventListener('DOMContentLoaded', () => {
     
     navItems.forEach(item => {
         item.addEventListener('click', () => {
+            const targetTab = item.getAttribute('data-tab');
+            const targetView = document.getElementById(`view-${targetTab}`);
+            
+            if (item.classList.contains('active')) return;
+
+            // Immediate Tactile Feedback
             navItems.forEach(n => n.classList.remove('active'));
             item.classList.add('active');
 
-            const targetTab = item.getAttribute('data-tab');
+            // Optimized View Switching
             views.forEach(view => {
-                if (view.id === `view-${targetTab}`) {
-                    view.classList.add('active');
-                    view.style.animation = 'none';
-                    view.offsetHeight; 
-                    view.style.animation = null;
+                if (view === targetView) {
+                    // 1. Prepare for GPU acceleration
+                    view.style.willChange = 'opacity, transform';
+                    
+                    // 2. Show the element (display: block) without animation yet
+                    view.classList.add('animating');
+                    
+                    // 3. Double rAF to ensure display:block has been painted, then trigger animation
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            view.classList.add('active');
+                        });
+                    });
+
+                    // 4. Cleanup memory after transition
+                    const cleanup = (e) => {
+                        if (e.propertyName === 'opacity' || e.propertyName === 'transform') {
+                            view.style.willChange = 'auto';
+                            view.classList.remove('animating');
+                            view.removeEventListener('transitionend', cleanup);
+                        }
+                    };
+                    view.addEventListener('transitionend', cleanup);
                 } else {
-                    view.classList.remove('active');
+                    // Instantly hide other views
+                    view.classList.remove('active', 'animating');
+                    view.style.willChange = 'auto';
                 }
             });
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Fast scroll to top
+            window.scrollTo(0, 0);
         });
     });
 
