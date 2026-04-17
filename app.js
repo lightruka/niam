@@ -168,8 +168,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 onboardingSubmit.querySelector('.btn-content').textContent = "Recommencer 🚀";
             } else {
                 showToast(`Bon appétit, Chef ${username} ! 🚀`);
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                handleSessionState(session);
+                // Force Reload pour réinitialiser l'état et charger le générateur
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             }
         });
     }
