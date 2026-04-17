@@ -52,6 +52,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(generatorView) generatorView.classList.remove('active');
                 if(onboardingView) onboardingView.classList.add('active');
                 if(bottomNav) bottomNav.classList.add('hidden');
+
+                // Initialiser le Wizard sur l'étape 1
+                const steps = document.querySelectorAll('.onboarding-step');
+                steps.forEach(s => s.classList.add('right'));
+                const firstStep = document.getElementById('ob-step-1');
+                if(firstStep) {
+                    firstStep.classList.remove('right');
+                    firstStep.classList.add('active');
+                }
             }
         } else {
             // Déconnecté : on force Auth
