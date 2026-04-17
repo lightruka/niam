@@ -1967,6 +1967,41 @@ body.camera-open {
     background: transparent !important;
 }
 
+/* --- AVATAR UPLOAD --- */
+#profile-avatar-container {
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#profile-avatar-container:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(212, 128, 58, 0.3);
+}
+#profile-avatar-container::after {
+    content: '📷';
+    position: absolute;
+    bottom: -20px; left: 0; right: 0;
+    background: rgba(0,0,0,0.6);
+    color: white; font-size: 0.8rem;
+    text-align: center; padding: 2px 0;
+    transition: bottom 0.2s ease;
+}
+#profile-avatar-container:hover::after {
+    bottom: 0;
+}
+#avatar-img {
+    width: 100%; height: 100%; object-fit: cover;
+}
+#avatar-loading {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+}
+#avatar-loading .spinner {
+    width: 20px; height: 20px; border-width: 2px;
+}
+
 /* ---------- Media Queries ---------- */
 @media (max-width: 400px) {
     .auth-content {

@@ -275,9 +275,14 @@
         <div id="view-profile" class="view">
             <header class="page-header profile-page-header">
                 <div class="user-profile-header">
-                    <div class="profile-avatar">
-                        <span>👩‍🍳</span>
+                    <div class="profile-avatar" id="profile-avatar-container" title="Changer de photo">
+                        <span id="avatar-emoji">👩‍🍳</span>
+                        <img id="avatar-img" class="hidden" alt="Photo de profil">
+                        <div id="avatar-loading" class="hidden">
+                            <span class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></span>
+                        </div>
                     </div>
+                    <input type="file" id="avatar-upload" accept="image/*" hidden>
                     <div class="profile-info">
                         <label for="username-input" class="username-label">Nom d'utilisateur</label>
                         <input type="text" id="username-input" class="username-input" placeholder="Chef Niam !">

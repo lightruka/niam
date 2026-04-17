@@ -1011,6 +1011,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (data.budgetToggle) budgetToggle.checked = true;
         
+        if (data.preferences) {
+            prefBadges.forEach(btn => {
+                const diet = btn.textContent.trim();
+                if (data.preferences.includes(diet)) btn.classList.add('active');
+            });
+        }
+
+        if (data.avatar_url) {
+            const img = document.getElementById('avatar-img');
+            const emoji = document.getElementById('avatar-emoji');
+            if (img && emoji) {
+                img.src = data.avatar_url;
+                img.classList.remove('hidden');
+                emoji.classList.add('hidden');
+            }
+        }
+        
         if (data.equipment) {
             gridBtns.forEach(btn => {
                 if (data.equipment.includes(btn.dataset.equip)) btn.classList.add('active');
@@ -1096,6 +1113,69 @@ document.addEventListener('DOMContentLoaded', () => {
             if(confirm('Êtes-vous sûr de vouloir réinitialiser toutes vos données (profil, préférences) ?')) {
                 localStorage.removeItem('antiGaspiProfile');
                 location.reload(); 
+            }
+        });
+    }
+
+    // ---- Avatar Storage Logic ----
+    const avatarContainer = document.getElementById('profile-avatar-container');
+    const avatarUpload = document.getElementById('avatar-upload');
+    const avatarImg = document.getElementById('avatar-img');
+    const avatarEmoji = document.getElementById('avatar-emoji');
+    const avatarLoading = document.getElementById('avatar-loading');
+
+    if (avatarContainer && avatarUpload) {
+        avatarContainer.addEventListener('click', () => avatarUpload.click());
+
+        avatarUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            avatarLoading.classList.remove('hidden'); // Afficher le chargement
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) throw new Error("Vous devez être connecté.");
+
+                const userId = session.user.id;
+                const fileExt = file.name.split('.').pop();
+                const filePath = `${userId}/avatar.${fileExt}`; 
+
+                // 1. Upload vers le Storage (écrase l'ancienne si elle existe)
+                const { error: uploadError } = await supabaseClient.storage
+                    .from('avatars')
+                    .upload(filePath, file, { upsert: true });
+
+                if (uploadError) throw uploadError;
+
+                // 2. Récupérer l'URL publique
+                const { data: { publicUrl } } = supabaseClient.storage
+                    .from('avatars')
+                    .getPublicUrl(filePath);
+
+                // 3. Mettre à jour la table profiles
+                const { error: updateError } = await supabaseClient
+                    .from('profiles')
+                    .update({ avatar_url: publicUrl })
+                    .eq('id', userId);
+
+                if (updateError) throw updateError;
+
+                // 4. Mettre à jour l'UI et le LocalStorage
+                avatarImg.src = publicUrl + "?t=" + new Date().getTime(); // Anti-cache
+                avatarImg.classList.remove('hidden');
+                avatarEmoji.classList.add('hidden');
+
+                const localData = JSON.parse(localStorage.getItem('antiGaspiProfile') || '{}');
+                localData.avatar_url = publicUrl;
+                localStorage.setItem('antiGaspiProfile', JSON.stringify(localData));
+
+                showToast("Profil mis à jour ! 📸");
+
+            } catch (error) {
+                showToast("Erreur : " + error.message);
+            } finally {
+                avatarLoading.classList.add('hidden');
             }
         });
     }
