@@ -1837,6 +1837,12 @@ body.camera-open {
     z-index: 9000;
 }
 
+#view-onboarding:not(.active) {
+    display: none !important;
+    pointer-events: none;
+    opacity: 0;
+}
+
 .onboarding-container {
     position: relative;
     width: 90%;
@@ -1939,22 +1945,26 @@ body.camera-open {
 }
 
 .ghost-btn {
-    background: transparent;
-    border: none;
-    color: var(--clr-text-soft);
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding: 14px;
-    margin-top: 8px;
+    background: transparent !important;
+    background-image: none !important; /* Retire le dégradé */
+    box-shadow: none !important;
+    border: none !important;
+    color: var(--clr-text-soft) !important; /* Gris discret */
+    font-size: 0.85rem !important; /* Plus petit */
+    font-weight: 600 !important;
+    padding: 10px !important;
+    margin-top: 12px !important;
     cursor: pointer;
-    transition: color 0.2s ease;
-    width: auto;
+    width: auto !important;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    transition: color 0.2s ease;
 }
 
 .ghost-btn:hover {
-    color: var(--clr-primary);
+    color: var(--clr-primary) !important;
+    transform: none !important;
+    background: transparent !important;
 }
 
 /* ---------- Media Queries ---------- */
