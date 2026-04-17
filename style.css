@@ -1847,12 +1847,13 @@ body.camera-open {
 .onboarding-container {
     position: relative;
     width: 100%;
-    max-width: 420px;
-    min-height: 480px;
+    max-width: 440px;
+    min-height: 520px;
     overflow: hidden;
     background: #fff;
-    border-radius: 32px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.06);
+    border-radius: 36px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.08); /* More premium shadow */
+    display: flex;
 }
 
 .onboarding-step {
@@ -1864,7 +1865,7 @@ body.camera-open {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px 24px;
+    padding: 48px 32px;
     opacity: 0;
     pointer-events: none;
     text-align: center;
@@ -1880,25 +1881,78 @@ body.camera-open {
 
 .onboarding-step.right {
     transform: translateX(100%);
-    opacity: 0;
 }
 
 .onboarding-step.left {
     transform: translateX(-100%);
-    opacity: 0;
+}
+
+.onboarding-step .auth-form {
+    width: 100%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.onboarding-step .input-group {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 24px;
+}
+
+.onboarding-step .auth-title {
+    margin-bottom: 12px;
+    font-size: 2.2rem;
+}
+
+.onboarding-step .generate-btn {
+    width: 100%;
+    margin-top: 24px;
+}
+
+.onboarding-diets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center; /* Center the multi-select badges */
+    margin-top: 12px;
+    width: 100%;
+}
+
+.onboarding-diets .pref-badge {
+    padding: 12px 18px;
+    border-radius: 100px;
+    border: 1.5px solid var(--clr-border);
+    background: var(--clr-surface);
+    color: var(--clr-text);
+    font-size: 0.92rem;
+    font-weight: 600;
+    transition: all 0.2s var(--ease);
+    cursor: pointer;
+}
+
+.onboarding-diets .pref-badge.active {
+    background: var(--clr-primary);
+    border-color: var(--clr-primary);
+    color: #fff;
+    box-shadow: 0 4px 15px var(--clr-primary-glow);
+    transform: translateY(-2px);
 }
 
 .ghost-btn {
     background: transparent;
     border: none;
     color: var(--clr-text-soft);
-    font-size: 0.9rem;
-    font-weight: 500;
-    padding: 12px;
-    margin-top: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 14px;
+    margin-top: 8px;
     cursor: pointer;
     transition: color 0.2s ease;
-    width: 100%;
+    width: auto;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .ghost-btn:hover {
