@@ -1,6 +1,7 @@
-/* ============================================
-   Niam ! — Design System & Styles
-   ============================================ */
+
+* {
+    box-sizing: border-box;
+}
 
 /* ---------- CSS Custom Properties ---------- */
 :root {
@@ -1688,8 +1689,8 @@ body.camera-open {
     display: none; /* Controlled by JS */
     align-items: center;
     justify-content: center;
-    padding: 24px;
-    text-align: center;
+    padding: 24px 16px;
+    min-height: 100dvh;
 }
 
 .auth-view.active {
@@ -1698,7 +1699,13 @@ body.camera-open {
 
 .auth-content {
     width: 100%;
-    max-width: 340px;
+    max-width: 360px;
+    padding: 32px 24px;
+    background: var(--clr-surface);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    margin: 0 auto;
     animation: fadeSlideUp 0.8s var(--ease) both;
 }
 
@@ -1757,8 +1764,9 @@ body.camera-open {
     border: 1.5px solid var(--clr-border);
     background: var(--clr-surface);
     color: var(--clr-text);
-    font-size: 1.05rem;
+    font-size: 16px !important; /* Prevent iOS zoom */
     transition: all 0.3s var(--ease);
+    margin-bottom: 8px;
 }
 
 .auth-form input:focus {
@@ -1965,4 +1973,14 @@ body.camera-open {
 
 .ghost-btn:hover {
     color: var(--clr-primary);
+}
+
+/* ---------- Media Queries ---------- */
+@media (max-width: 400px) {
+    .auth-content {
+        padding: 24px 16px;
+    }
+    .auth-title {
+        font-size: 2.2rem;
+    }
 }
