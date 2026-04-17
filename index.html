@@ -47,34 +47,63 @@
 
         <!-- ========== ONBOARDING VIEW ========== -->
         <div id="view-onboarding" class="view">
-            <div class="auth-content onboarding-content">
-                <header class="auth-header">
-                    <h1 class="auth-title">Bienvenue ! 👋</h1>
-                    <p class="auth-subtitle">Configurons votre espace culinaire en quelques secondes.</p>
-                </header>
-                
-                <div class="auth-form onboarding-form">
-                    <div class="input-group">
-                        <label for="onboarding-username">Votre Prénom</label>
-                        <input type="text" id="onboarding-username" placeholder="Chef Cuisto" required>
-                    </div>
-
-                    <div class="input-group">
-                        <label>Préférences Alimentaires</label>
-                        <p class="field-desc">Sélectionnez tous les régimes qui vous concernent.</p>
-                        <div class="onboarding-diets" id="onboarding-diets">
-                            <button class="pref-badge" data-diet="Vegetarian">Végétarien</button>
-                            <button class="pref-badge" data-diet="Vegan">Vegan</button>
-                            <button class="pref-badge" data-diet="Gluten-free">Sans gluten</button>
-                            <button class="pref-badge" data-diet="Lactose-free">Sans lactose</button>
-                            <button class="pref-badge" data-diet="Pork-free">Sans porc</button>
-                            <button class="pref-badge" data-diet="None">Aucun</button>
+            <div class="onboarding-container" id="onboarding-wizard">
+                <!-- STEP 1: WELCOME -->
+                <div class="onboarding-step active" id="ob-step-1">
+                    <div class="auth-content">
+                        <header class="auth-header">
+                            <h1 class="auth-title">Bienvenue ! 👋</h1>
+                            <p class="auth-subtitle">C'est le début d'une cuisine sans gaspillage.</p>
+                        </header>
+                        <div class="auth-form">
+                            <div class="input-group">
+                                <label for="onboarding-username">Comment doit-on vous appeler ?</label>
+                                <input type="text" id="onboarding-username" placeholder="Chef Cuisto" required>
+                            </div>
+                            <button class="generate-btn next-step" data-next="2">
+                                <span class="btn-content">Continuer</span>
+                            </button>
                         </div>
                     </div>
+                </div>
 
-                    <button class="generate-btn" id="onboarding-submit" style="margin-top: 24px;">
-                        <span class="btn-content">Commencer l'aventure 🚀</span>
-                    </button>
+                <!-- STEP 2: DIETS -->
+                <div class="onboarding-step right" id="ob-step-2">
+                    <div class="auth-content">
+                        <header class="auth-header">
+                            <h1 class="auth-title">Ton Régime ? 🥬</h1>
+                            <p class="auth-subtitle">Sélectionnez tous les régimes qui vous concernent.</p>
+                        </header>
+                        <div class="auth-form">
+                            <div class="onboarding-diets" id="onboarding-diets">
+                                <button class="pref-badge" data-diet="Vegetarian">Végétarien</button>
+                                <button class="pref-badge" data-diet="Vegan">Vegan</button>
+                                <button class="pref-badge" data-diet="Gluten-free">Sans gluten</button>
+                                <button class="pref-badge" data-diet="Lactose-free">Sans lactose</button>
+                                <button class="pref-badge" data-diet="None">Aucun</button>
+                            </div>
+                            <button class="generate-btn next-step" data-next="3" style="margin-top: 24px;">
+                                <span class="btn-content">Continuer</span>
+                            </button>
+                            <button class="ghost-btn prev-step" data-prev="1">Retour</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: FINAL -->
+                <div class="onboarding-step right" id="ob-step-3">
+                    <div class="auth-content">
+                        <header class="auth-header">
+                            <h1 class="auth-title">Prêt à cuisiner ? 🚀</h1>
+                            <p class="auth-subtitle" id="onboarding-summary-text">C'est parti pour l'aventure !</p>
+                        </header>
+                        <div class="auth-form">
+                            <button class="generate-btn" id="onboarding-submit">
+                                <span class="btn-content">Commencer l'aventure ✨</span>
+                            </button>
+                            <button class="ghost-btn prev-step" data-prev="2">Modifier mes infos</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

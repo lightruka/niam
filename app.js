@@ -63,19 +63,69 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 4. Logique de l'Onboarding
+    // 4. Logique de l'Onboarding (Wizard Multi-Étapes)
+    const onboardingWizard = document.getElementById('onboarding-wizard');
     const onboardingDiets = document.querySelectorAll('#onboarding-diets .pref-badge');
     const onboardingSubmit = document.getElementById('onboarding-submit');
     const onboardingUsername = document.getElementById('onboarding-username');
+    const nextBtns = document.querySelectorAll('.next-step');
+    const prevBtns = document.querySelectorAll('.prev-step');
+    const summaryText = document.getElementById('onboarding-summary-text');
+
+    function goToStep(stepNum, direction = 'forward') {
+        const steps = document.querySelectorAll('.onboarding-step');
+        const currentActive = document.querySelector('.onboarding-step.active');
+        const nextStep = document.getElementById(`ob-step-${stepNum}`);
+
+        if (!nextStep) return;
+
+        // Validation simple
+        if (stepNum === 2 && direction === 'forward') {
+            const name = onboardingUsername.value.trim();
+            if (!name) {
+                showToast("Dites-nous votre nom, Chef ! 👨‍🍳");
+                return;
+            }
+            if (summaryText) {
+                summaryText.textContent = `Excellent ${name} ! On fonce ?`;
+            }
+        }
+
+        // Gérer les classes d'animation
+        steps.forEach(step => {
+            if (step === nextStep) {
+                step.className = 'onboarding-step active';
+            } else if (step === currentActive) {
+                step.className = direction === 'forward' ? 'onboarding-step left' : 'onboarding-step right';
+            } else {
+                // Maintenir les autres étapes à leur position logique
+                const sNum = parseInt(step.id.split('-').pop());
+                if (sNum < stepNum) step.className = 'onboarding-step left';
+                else if (sNum > stepNum) step.className = 'onboarding-step right';
+            }
+        });
+    }
+
+    nextBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const nextStep = btn.dataset.next;
+            goToStep(parseInt(nextStep), 'forward');
+        });
+    });
+
+    prevBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const prevStep = btn.dataset.prev;
+            goToStep(parseInt(prevStep), 'backward');
+        });
+    });
 
     onboardingDiets.forEach(badge => {
         badge.addEventListener('click', () => {
             if (badge.dataset.diet === 'None') {
-                // Si on clique sur "Aucun", on désélectionne tout le reste
                 onboardingDiets.forEach(b => b.classList.remove('active'));
                 badge.classList.add('active');
             } else {
-                // On retire "Aucun" si on sélectionne un régime spécifique
                 const noneBadge = Array.from(onboardingDiets).find(b => b.dataset.diet === 'None');
                 if (noneBadge) noneBadge.classList.remove('active');
                 badge.classList.toggle('active');
@@ -88,11 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const username = onboardingUsername.value.trim();
             const selectedDiets = Array.from(document.querySelectorAll('#onboarding-diets .pref-badge.active'))
                                       .map(b => b.dataset.diet);
-
-            if (!username) {
-                showToast("Dites-nous votre nom, Chef ! 👨‍🍳");
-                return;
-            }
 
             onboardingSubmit.disabled = true;
             onboardingSubmit.querySelector('.btn-content').textContent = "C'est parti...";
@@ -109,12 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
             if (error) {
-                showToast("Erreur lors de la création du profil : " + error.message);
+                showToast("Erreur : " + error.message);
                 onboardingSubmit.disabled = false;
                 onboardingSubmit.querySelector('.btn-content').textContent = "Recommencer 🚀";
             } else {
-                showToast(`Bienvenue, Chef ${username} ! 🚀`);
-                // Rafraîchir l'état pour passer au générateur
+                showToast(`Bon appétit, Chef ${username} ! 🚀`);
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 handleSessionState(session);
             }
