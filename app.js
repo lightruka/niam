@@ -34,11 +34,23 @@ document.addEventListener('DOMContentLoaded', () => {
             // Utilisateur connecté : On vérifie si le profil existe
             const { data: profile, error } = await supabaseClient
                 .from('profiles')
-                .select('username')
+                .select('*')
                 .eq('id', session.user.id)
                 .single();
 
             if (profile) {
+                // Synchronisation avec le LocalStorage
+                const localData = JSON.parse(localStorage.getItem('antiGaspiProfile') || '{}');
+                localStorage.setItem('antiGaspiProfile', JSON.stringify({
+                    ...localData,
+                    username: profile.username,
+                    preferences: profile.preferences || [],
+                    avatar_url: profile.avatar_url
+                }));
+
+                // Mets à jour l'interface avec les nouvelles données
+                if (typeof loadProfileData === 'function') loadProfileData();
+
                 // Profil existant -> Go vers le Générateur
                 if(authView) authView.classList.remove('active');
                 if(onboardingView) onboardingView.classList.remove('active');
@@ -168,6 +180,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 onboardingSubmit.querySelector('.btn-content').textContent = "Recommencer 🚀";
             } else {
                 showToast(`Bon appétit, Chef ${username} ! 🚀`);
+                
+                // Sauvegarde de sécurité dans le LocalStorage
+                const localData = JSON.parse(localStorage.getItem('antiGaspiProfile') || '{}');
+                localStorage.setItem('antiGaspiProfile', JSON.stringify({
+                    ...localData,
+                    username: username,
+                    preferences: selectedDiets
+                }));
+
                 // Force Reload pour réinitialiser l'état et charger le générateur
                 setTimeout(() => {
                     window.location.reload();
