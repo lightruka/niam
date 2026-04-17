@@ -23,19 +23,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 3. Fonction pour basculer l'affichage
-    function handleSessionState(session) {
+    // 3. Fonction pour basculer l'affichage (Gatekeeper avec Onboarding)
+    async function handleSessionState(session) {
         const authView = document.getElementById('view-auth');
+        const onboardingView = document.getElementById('view-onboarding');
         const generatorView = document.getElementById('view-generator');
         const bottomNav = document.getElementById('bottom-nav');
 
         if (session) {
-            // Connecté : on cache Auth, on montre l'App
-            if(authView) authView.classList.remove('active');
-            if(generatorView) generatorView.classList.add('active');
-            if(bottomNav) bottomNav.classList.remove('hidden');
-            
-            loadRecipesFromCloud(); // Charger les données cloud
+            // Utilisateur connecté : On vérifie si le profil existe
+            const { data: profile, error } = await supabaseClient
+                .from('profiles')
+                .select('username')
+                .eq('id', session.user.id)
+                .single();
+
+            if (profile) {
+                // Profil existant -> Go vers le Générateur
+                if(authView) authView.classList.remove('active');
+                if(onboardingView) onboardingView.classList.remove('active');
+                if(generatorView) generatorView.classList.add('active');
+                if(bottomNav) bottomNav.classList.remove('hidden');
+                
+                loadRecipesFromCloud(); 
+            } else {
+                // Pas de profil -> Go vers Onboarding
+                if(authView) authView.classList.remove('active');
+                if(generatorView) generatorView.classList.remove('active');
+                if(onboardingView) onboardingView.classList.add('active');
+                if(bottomNav) bottomNav.classList.add('hidden');
+            }
         } else {
             // Déconnecté : on force Auth
             document.querySelectorAll('.view').forEach(v => {
@@ -44,6 +61,64 @@ document.addEventListener('DOMContentLoaded', () => {
             if(authView) authView.classList.add('active');
             if(bottomNav) bottomNav.classList.add('hidden');
         }
+    }
+
+    // 4. Logique de l'Onboarding
+    const onboardingDiets = document.querySelectorAll('#onboarding-diets .pref-badge');
+    const onboardingSubmit = document.getElementById('onboarding-submit');
+    const onboardingUsername = document.getElementById('onboarding-username');
+
+    onboardingDiets.forEach(badge => {
+        badge.addEventListener('click', () => {
+            if (badge.dataset.diet === 'None') {
+                // Si on clique sur "Aucun", on désélectionne tout le reste
+                onboardingDiets.forEach(b => b.classList.remove('active'));
+                badge.classList.add('active');
+            } else {
+                // On retire "Aucun" si on sélectionne un régime spécifique
+                const noneBadge = Array.from(onboardingDiets).find(b => b.dataset.diet === 'None');
+                if (noneBadge) noneBadge.classList.remove('active');
+                badge.classList.toggle('active');
+            }
+        });
+    });
+
+    if (onboardingSubmit) {
+        onboardingSubmit.addEventListener('click', async () => {
+            const username = onboardingUsername.value.trim();
+            const selectedDiets = Array.from(document.querySelectorAll('#onboarding-diets .pref-badge.active'))
+                                      .map(b => b.dataset.diet);
+
+            if (!username) {
+                showToast("Dites-nous votre nom, Chef ! 👨‍🍳");
+                return;
+            }
+
+            onboardingSubmit.disabled = true;
+            onboardingSubmit.querySelector('.btn-content').textContent = "C'est parti...";
+
+            const { data: { user } } = await supabaseClient.auth.getUser();
+
+            const { error } = await supabaseClient
+                .from('profiles')
+                .upsert({
+                    id: user.id,
+                    username: username,
+                    preferences: selectedDiets,
+                    avatar_url: null
+                });
+
+            if (error) {
+                showToast("Erreur lors de la création du profil : " + error.message);
+                onboardingSubmit.disabled = false;
+                onboardingSubmit.querySelector('.btn-content').textContent = "Recommencer 🚀";
+            } else {
+                showToast(`Bienvenue, Chef ${username} ! 🚀`);
+                // Rafraîchir l'état pour passer au générateur
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                handleSessionState(session);
+            }
+        });
     }
 
     if (supabaseClient) {

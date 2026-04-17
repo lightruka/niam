@@ -45,6 +45,40 @@
             </div>
         </div>
 
+        <!-- ========== ONBOARDING VIEW ========== -->
+        <div id="view-onboarding" class="view">
+            <div class="auth-content onboarding-content">
+                <header class="auth-header">
+                    <h1 class="auth-title">Bienvenue ! 👋</h1>
+                    <p class="auth-subtitle">Configurons votre espace culinaire en quelques secondes.</p>
+                </header>
+                
+                <div class="auth-form onboarding-form">
+                    <div class="input-group">
+                        <label for="onboarding-username">Votre Prénom</label>
+                        <input type="text" id="onboarding-username" placeholder="Chef Cuisto" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Préférences Alimentaires</label>
+                        <p class="field-desc">Sélectionnez tous les régimes qui vous concernent.</p>
+                        <div class="onboarding-diets" id="onboarding-diets">
+                            <button class="pref-badge" data-diet="Vegetarian">Végétarien</button>
+                            <button class="pref-badge" data-diet="Vegan">Vegan</button>
+                            <button class="pref-badge" data-diet="Gluten-free">Sans gluten</button>
+                            <button class="pref-badge" data-diet="Lactose-free">Sans lactose</button>
+                            <button class="pref-badge" data-diet="Pork-free">Sans porc</button>
+                            <button class="pref-badge" data-diet="None">Aucun</button>
+                        </div>
+                    </div>
+
+                    <button class="generate-btn" id="onboarding-submit" style="margin-top: 24px;">
+                        <span class="btn-content">Commencer l'aventure 🚀</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- ========== VIEWS CONTAINER ========== -->
         <div id="view-generator" class="view">
             <!-- ========== HERO SECTION ========== -->

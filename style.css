@@ -1775,3 +1775,52 @@ body.camera-open {
     color: var(--clr-danger); /* Red */
     font-weight: 500;
 }
+
+/* ---------- ONBOARDING VIEW ---------- */
+.onboarding-content {
+    max-width: 400px;
+    animation: fadeSlideUp 0.8s var(--ease) both;
+}
+
+.onboarding-form .input-group {
+    margin-bottom: 24px;
+}
+
+.onboarding-diets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.onboarding-diets .pref-badge {
+    padding: 10px 16px;
+    border-radius: 100px;
+    border: 1.5px solid var(--clr-border);
+    background: var(--clr-surface);
+    color: var(--clr-text);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s var(--ease);
+    cursor: pointer;
+}
+
+.onboarding-diets .pref-badge:hover {
+    border-color: var(--clr-primary);
+    background: var(--clr-primary-glow);
+}
+
+.onboarding-diets .pref-badge.active {
+    background: var(--clr-primary);
+    border-color: var(--clr-primary);
+    color: #fff;
+    box-shadow: 0 4px 12px var(--clr-primary-glow);
+    transform: translateY(-2px);
+}
+
+.field-desc {
+    font-size: 0.82rem;
+    color: var(--clr-text-soft);
+    margin-top: -6px;
+    margin-bottom: 12px;
+}
