@@ -1266,7 +1266,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize state
     loadProfileData();
     updateCounter();
-    checkSession();
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        handleSessionState(session);
+    });
 
     // ---- Offline UX Detector ----
     window.addEventListener('offline', () => {
