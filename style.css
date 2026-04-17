@@ -1,6 +1,8 @@
 
-* {
+*, *::before, *::after {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 /* ---------- CSS Custom Properties ---------- */
@@ -1675,37 +1677,45 @@ body.camera-open {
     transition: opacity 0.3s ease-out;
 }
 
-.camera-flash.active {
-    opacity: 1;
-    transition: none; /* instant white flash */
+.camera-flash.view:not(.active) {
+    display: none !important;
+    pointer-events: none;
+    opacity: 0;
+    transition: none;
 }
 
 /* ---------- AUTH VIEW ---------- */
 .auth-view {
     position: fixed;
     inset: 0;
-    z-index: 2000;
+    z-index: 50;
     background: var(--clr-bg);
-    display: none; /* Controlled by JS */
-    align-items: center;
+    display: none !important; /* Controlled by JS .active */
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
     padding: 24px 16px;
+    width: 100%;
     min-height: 100dvh;
 }
 
 .auth-view.active {
-    display: flex;
+    display: flex !important;
 }
 
 .auth-content {
     width: 100%;
-    max-width: 360px;
-    padding: 32px 24px;
+    max-width: 380px;
+    padding: 40px 25px;
     background: var(--clr-surface);
     border-radius: var(--r-xl);
     box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     text-align: center;
-    margin: 0 auto;
+    position: relative;
+    z-index: 60;
     animation: fadeSlideUp 0.8s var(--ease) both;
 }
 
@@ -1753,8 +1763,9 @@ body.camera-open {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--clr-text-muted);
-    margin-bottom: 10px;
-    margin-left: 4px;
+    margin-bottom: 5px;
+    text-align: left;
+    width: 100%;
 }
 
 .auth-form input {
@@ -1764,15 +1775,25 @@ body.camera-open {
     border: 1.5px solid var(--clr-border);
     background: var(--clr-surface);
     color: var(--clr-text);
-    font-size: 16px !important; /* Prevent iOS zoom */
+    font-size: 16px !important; /* Block iOS Zoom */
     transition: all 0.3s var(--ease);
-    margin-bottom: 8px;
+    margin-bottom: 5px;
+    position: relative;
+    z-index: 70;
+    pointer-events: auto;
 }
 
 .auth-form input:focus {
     outline: none;
     border-color: var(--clr-primary);
     box-shadow: 0 0 0 4px var(--clr-primary-glow);
+}
+
+.auth-form .generate-btn {
+    width: 100%;
+    position: relative;
+    z-index: 70;
+    pointer-events: auto;
 }
 
 .auth-info {
