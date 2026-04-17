@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsSection.classList.add('hidden');
 
         try {
-            const response = await fetch("/api/generate", {
+            const response = await fetch("https://niam-jet.vercel.app/api/generate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -1262,4 +1262,20 @@ document.addEventListener('DOMContentLoaded', () => {
     loadProfileData();
     updateCounter();
     checkSession();
+
+    // ---- Offline UX Detector ----
+    window.addEventListener('offline', () => {
+        showToast("📶 Oups, vous n'êtes plus connecté à Internet !");
+        // Si on était en train de générer, on arrête le chargement
+        const genBtn = document.getElementById('generate-btn');
+        if(genBtn && genBtn.classList.contains('loading')) {
+            genBtn.classList.remove('loading');
+            genBtn.querySelector('.btn-content').classList.remove('hidden');
+            genBtn.querySelector('.btn-loading').classList.add('hidden');
+        }
+    });
+
+    window.addEventListener('online', () => {
+        showToast("🌐 Connexion rétablie !");
+    });
 });
