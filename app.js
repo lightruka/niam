@@ -5,7 +5,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 document.addEventListener('DOMContentLoaded', () => {
     // ---- Supabase Auth Logic ----
     const authForm = document.getElementById('auth-form');
-    const authEmail = document.getElementById('auth-email');
+    // authEmail n'est plus pré-déclaré ici pour éviter les erreurs si l'élément change d'ID
 
     // 1. Vérifier la session au démarrage
     supabaseClient.auth.getSession().then(({ data: { session } }) => {
@@ -176,17 +176,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (supabaseClient) {
+    if (supabaseClient && authForm) {
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = authEmail.value.trim();
-            const submitBtn = document.getElementById('auth-submit');
-            const authInfo = document.querySelector('.auth-info');
+            const emailInput = document.getElementById('email-input');
+            const submitBtn = document.getElementById('login-btn');
+            const authMessage = document.getElementById('auth-message');
+            
+            if (!emailInput || !submitBtn || !authMessage) return;
+
+            const email = emailInput.value.trim();
             
             submitBtn.disabled = true;
-            submitBtn.querySelector('.btn-content').textContent = "Envoi en cours...";
-            authInfo.classList.remove('success', 'error');
-            authInfo.textContent = "Préparation de votre lien magique...";
+            submitBtn.textContent = "Envoi en cours...";
+            authMessage.className = ''; // Reset classes (success, error)
+            authMessage.textContent = "Préparation de votre lien magique...";
 
             const { error } = await supabaseClient.auth.signInWithOtp({
                 email,
@@ -196,14 +200,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (error) {
                 showToast("❌ Erreur : " + error.message);
                 submitBtn.disabled = false;
-                submitBtn.querySelector('.btn-content').textContent = "Réessayer";
-                authInfo.textContent = "Erreur : " + error.message;
-                authInfo.classList.add('error');
+                submitBtn.textContent = "Réessayer";
+                authMessage.textContent = "Erreur : " + error.message;
+                authMessage.classList.add('error');
             } else {
                 showToast("📩 Lien envoyé !");
-                submitBtn.querySelector('.btn-content').textContent = "Lien envoyé !";
-                authInfo.textContent = "Lien envoyé ! Vérifiez votre boîte mail (et vos spams).";
-                authInfo.classList.add('success');
+                submitBtn.textContent = "Lien envoyé !";
+                authMessage.textContent = "Lien envoyé ! Vérifiez votre boîte mail (et vos spams).";
+                authMessage.classList.add('success');
             }
         });
     }

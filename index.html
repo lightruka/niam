@@ -18,31 +18,18 @@
 
     <div class="mobile-frame">
         <!-- ========== AUTH VIEW ========== -->
-        <div id="view-auth" class="view auth-view active">
-            <div class="auth-content">
-                <div class="auth-logo">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
-                        <rect width="100" height="100" rx="22" fill="white"/>
-                        <g fill="none" stroke="#D4803A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M32 54 C22 54 22 35 35 35 C35 25 45 20 50 20 C55 20 65 25 65 35 C78 35 78 54 68 54 M34 54 L66 54 M34 62 L66 62"/>
-                        </g>
-                        <path d="M50 72 c-4 0-7 4-7 8 s3 8 7 8 7-4 7-8-3-8-7-8z" fill="#D4803A"/>
-                    </svg>
-                </div>
-                <h1 class="auth-title">Niam !</h1>
-                <p class="auth-subtitle">Partagez l'amour, sauvez vos restes.</p>
-                
-                <form id="auth-form" class="auth-form">
-                    <div class="input-group">
-                        <label for="auth-email">Votre Email</label>
-                        <input type="email" id="auth-email" placeholder="chef@cuisto.com" required>
-                    </div>
-                    <button type="submit" class="generate-btn" id="auth-submit">
-                        <span class="btn-content">Recevoir mon lien magique ✨</span>
-                    </button>
-                </form>
-                <p class="auth-info">Un lien de connexion vous sera envoyé par email.</p>
-            </div>
+        <div id="view-auth" class="view active">
+          <div class="auth-card">
+            <h2 class="auth-title">Niam !</h2>
+            <p class="auth-subtitle">Partagez l'amour, sauvez vos restes.</p>
+            
+            <form id="auth-form" class="auth-form">
+              <label for="email-input">VOTRE EMAIL</label>
+              <input type="email" id="email-input" placeholder="chef@cuisto.com" required>
+              <button type="submit" id="login-btn">Recevoir mon lien magique ✨</button>
+            </form>
+            <p id="auth-message"></p>
+          </div>
         </div>
 
         <!-- ========== ONBOARDING VIEW ========== -->
