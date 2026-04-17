@@ -213,9 +213,14 @@ document.addEventListener('DOMContentLoaded', () => {
             authMessage.className = ''; // Reset classes (success, error)
             authMessage.textContent = "Préparation de votre lien magique...";
 
+            // Détecter si on est sur mobile (Capacitor)
+            const isMobile = window.Capacitor && window.Capacitor.isNative;
+            // Utiliser le Deep Link sur mobile, ou l'URL courante sur le web
+            const redirectUrl = isMobile ? 'niam://login-callback/' : window.location.href;
+
             const { error } = await supabaseClient.auth.signInWithOtp({
                 email,
-                options: { emailRedirectTo: window.location.href }
+                options: { emailRedirectTo: redirectUrl }
             });
 
             if (error) {
